@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+  web:
+    image: jonny:v1
+    container_name: website
+    restart: always
+    ports:
+      - "8080:3001"
+    networks:
+      - db-net
+networks:
+  db-net:
