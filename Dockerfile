@@ -1,6 +1,6 @@
-FROM node:lts-alpine3.16
+FROM node:18-alpine3.16
 
-LABEL version=16.0
+LABEL version=18.0
 LABEL description="Jonnattan Griffiths"
 LABEL product="Jonna App"
 
@@ -16,7 +16,8 @@ ENV LOGS_PATH=/app/logs
 WORKDIR /app/jonnapp
 
 RUN npm install && \
-    npm run build
+    ls -l
+    # npm run build
 
 EXPOSE 3001
 

@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   web:
-    image: jonny:v1
+    image: jonny:v1.1
     container_name: website
     restart: always
     ports:

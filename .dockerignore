@@ -1,0 +1,10 @@
+# Ignore 
+
+logs/
+.dockerignore
+.gitignore
+**/node_modules
+**/package-lock.json
+logger.log
+Dockerfile
+docker-compose.yml
