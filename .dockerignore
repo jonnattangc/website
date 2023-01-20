@@ -6,5 +6,5 @@ logs/
 **/node_modules
 **/package-lock.json
 logger.log
-Dockerfile
-docker-compose.yml
+Dockerfile*
+docker-compose*.yml

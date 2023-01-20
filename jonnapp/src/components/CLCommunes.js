@@ -1,10 +1,8 @@
-import React from "react";
-import { Alert, Checkbox, CircularProgress, Paper, Stack } from '@mui/material';
+import React from 'react';
+import { Alert, Grid, CircularProgress } from '@mui/material';
 import Select from 'react-select';
-import { MyMap } from './MyMap'
 
 class CLCommunes extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -16,16 +14,14 @@ class CLCommunes extends React.Component {
             selections: []
         };
         this.getCommunes = this.getCommunes.bind(this);
-        this.onChangeCheckbox = this.onChangeCheckbox.bind(this);
         this.getRegions = this.getRegions.bind(this);
         this.getRegions();
         // this.getCommunes(props.default);
     }
-
     /**
-     * Obtiene las comunas de una regi'on
-     * @param {*} region
-     */
+        * Obtiene las comunas de una regi'on
+        * @param {*} region
+        */
     async getRegions() {
         try {
             this.setState({ loading: true });
@@ -57,8 +53,6 @@ class CLCommunes extends React.Component {
             throw Error(error);
         }
     }
-
-
     /**
      * Obtiene las comunas de una regi'on
      * @param {*} region
@@ -94,14 +88,21 @@ class CLCommunes extends React.Component {
         }
     }
 
-    async onChangeCheckbox(event) {
+    onChangeCommune = async (event) => {
+        try {
+            console.log('#### Comuna: ', event.value);
+        }
+        catch (error) {
+            this.setState({ loading: false, errorMsg: error });
+            throw Error(error);
+        }
+    }
+
+    onChangeRegion = async (event) => {
         try {
             console.log('#### Region: ', event.value);
             this.setState({ region: event });
             await this.getCommunes(event.value);
-            // this.props.onCommuneChange(region, communes, this.state.communes);
-            // marca el efecto visual
-            // this.setState({ selections: communes });
         }
         catch (error) {
             this.setState({ loading: false, errorMsg: error });
@@ -111,7 +112,6 @@ class CLCommunes extends React.Component {
 
     render() {
         const { loading, communes, regions, region, errorMsg } = this.state;
-        console.log('Comunas: ', communes);
 
         if (loading)
             return (<div className='App_Main' align='center' > <CircularProgress /> </div>);
@@ -119,27 +119,24 @@ class CLCommunes extends React.Component {
             return (<div className='App_Main' align='center'> <Alert severity="error">{errorMsg}</Alert> </div>);
         else {
             return (
-                <div className='App_Main' align='center'>
-                    <Stack spacing={3}>
-                        <Paper elevation={8}>
-                            <Select labelId='Regiones' id='reg' options={regions} value={region} isSearchable={true}
-                                onChange={(event) => { this.onChangeCheckbox(event) }} />
-                        </Paper>
-                        {
-                            communes != null ?
-                                communes.forEach((com) => {
-                                  <Checkbox defaultChecked size='small' id={com.value} value={com.label} label={com.label}/>
-                                }) : null
-                        }
-                        <Paper elevation={8}>
-                        <MyMap/>
-                        </Paper>
-                    </Stack>
+                <div className='App_Main' align='center' >
+                    <Grid container spacing={1}>
+                        <Grid item xs={4}>
+                            <Select labelId='Regiones' id='reg'
+                                options={regions} value={region} isSearchable={true} onChange={(event) => { this.onChangeRegion(event) }} />
+                        </Grid>
+                        <Grid item xs={8}>
+                            {
+                                communes != null ? <Select labelId='Comunas' id='com' options={communes} isSearchable={true}
+                                    onChange={(event) => { this.onChangeCommune(event) }} /> : null
+                            }
+                        </Grid>
+                    </Grid>
                 </div>
             );
         }
-    }
 
+    }
 }
 
 export { CLCommunes };

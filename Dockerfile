@@ -1,24 +1,21 @@
-FROM node:18-alpine3.16
-
-LABEL version=18.0
-LABEL description="Jonnattan Griffiths"
-LABEL product="Jonna App"
-
-RUN npm install -g create-react-native-app && \
-    mkdir -p /app/logs
-
-COPY ./jonnapp /app/jonnapp
+FROM node:18-bullseye-slim as build-deps
 
 ENV NODE_ENV=production
-ENV PORT=3001
-ENV LOGS_PATH=/app/logs
 
-WORKDIR /app/jonnapp
+WORKDIR /usr/src/app
 
-RUN npm install && \
-    ls -l
-    # npm run build
+COPY ./jonnapp ./jonnapp
 
-EXPOSE 3001
+RUN cd jonnapp/  && \
+    npm install && \
+    npm run build
 
-CMD [ "/bin/sh", "./run.sh" ]
+FROM nginx:1.12-alpine
+
+COPY --from=build-deps /usr/src/app/jonnapp/build /usr/share/nginx/html
+
+ADD ./conf-nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

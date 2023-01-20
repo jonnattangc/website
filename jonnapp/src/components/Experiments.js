@@ -1,17 +1,16 @@
 import React from 'react';
-import { Button, Stack, Paper } from '@mui/material';
+import { Button, Paper, Stack, Box } from '@mui/material';
 import { Dashboard } from './Dashboard'
+import { DataGrid  } from '@mui/x-data-grid';
 
 class Experiments extends React.Component {
     render() {
-        console.info('Experiments... ' + window.location.pathname);
         return (
             <div className='App_Main' align='center' >
                 <Stack spacing={3}>
-                    <Paper elevation={8}> <LinkOther /> </Paper>
-                    <Paper elevation={8}> <MouseMoveExample /> </Paper>
-                    <Paper elevation={8}> <MyImagenToS3 /> </Paper>
                     <Paper elevation={8}> <Dashboard /> </Paper>
+                    <Paper elevation={8}> <MyImagenToS3 /> </Paper>
+                    <Paper elevation={8}> <LinkOther /> </Paper>
                 </Stack>
             </div>
         )
@@ -19,10 +18,57 @@ class Experiments extends React.Component {
 }
 
 
-export class MyImagenToS3 extends React.Component {
+class MyImagenToS3 extends React.Component {
+
     constructor(props) {
         super(props);
-        this.state = { size: 0, type: null, data: null, name: null };
+        this.state = { 
+            size: 0, 
+            type: null, 
+            data: null, 
+            name: null, 
+            x: 0, 
+            y: 0,
+            photos: null,
+            docs: null
+        };
+    }
+    
+
+    getData = async () => {
+        try {
+            var request = await fetch(
+                'https://dev.jonnattan.com/page/aws/contents', {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                }
+            });
+            var response = await request.json();
+            if (request.status === 200) {
+                var photos = []
+                response.photos.forEach(photo => {
+                    photos.push(photo);
+                });
+                var docs = []
+                response.docs.forEach(doc => {
+                    docs.push(doc);
+                });
+                this.setState({ photos: photos, docs: docs })
+            }
+            else {
+                console.log('[409]: ' + request.error);
+            }
+        }
+        catch (error) {
+            throw Error(error);
+        }
+    }
+
+    moveMouse = (e) => {
+        const { clientX, clientY } = e;
+        this.setState({ x: clientX, y: clientY });
     }
 
     handleClick = (e) => {
@@ -51,49 +97,97 @@ export class MyImagenToS3 extends React.Component {
     }
 
     render() {
-        const { data, name } = this.state;
+
+        const columns = [
+            { field: 'id', headerName: 'ID', width: 90 },
+            {
+              field: 'firstName',
+              headerName: 'Nombre',
+              width: 150,
+              editable: true,
+            },
+            {
+              field: 'lastName',
+              headerName: 'Descripcion',
+              width: 150,
+              editable: true,
+            },
+            {
+              field: 'age',
+              headerName: 'Tamaño (Kb)',
+              type: 'number',
+              width: 110,
+              editable: true,
+            },
+            {
+              field: 'fullName',
+              headerName: 'Full name',
+              description: 'This column has a value getter and is not sortable.',
+              sortable: false,
+              width: 160,
+              valueGetter: (params) =>
+                `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+            },
+        ];
+
+        const rows = [
+            { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
+            { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
+            { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
+            { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
+            { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
+            { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
+            { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
+            { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
+            { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
+          ];
+
+        const { data, name, x, y } = this.state;
         return (
-            <div className='App_Card' align='center' >
-                <input type="file" id="file" name="files" accept="image/*" />
-                <Button type="submit" variant="contained" color="primary" onClick={this.handleClick} >
-                    Enviar
-                </Button>
-                {
-                    data !== null ? <img alt="Imagen Producto" src={data} title={name} /> : null
-                }
-            </div>
-        )
-    }
-}
-
-
-export class MouseMoveExample extends React.Component {
-    state = { x: 0, y: 0 }
-    moveMouse = (e) => {
-        const { clientX, clientY } = e;
-        this.setState({ x: clientX, y: clientY });
-    }
-
-    render() {
-        return (
-            <div className='App_Card' align='center'
-                onMouseMove={this.moveMouse} >
-                Caja de prueba de pocisión Mouse:  X {this.state.x} Y {this.state.y}
-            </div>
+            <>
+                <div className='App_Main' align='center' onMouseMove={this.moveMouse} >
+                    <div>
+                        <p>
+                            <input type="file" id="file" name="files" accept="image/*" />
+                            &nbsp;&nbsp;&nbsp;
+                            <Button type="submit" variant="contained" color="primary" onClick={this.handleClick} >
+                                Enviar
+                            </Button>
+                        </p>
+                    </div>
+                    <div>&nbsp;&nbsp;&nbsp; Coordenadas: X({x},{y})  </div>
+                    {
+                        data !== null ? <img alt="Imagen Producto" src={data} title={name} /> : null
+                    }
+                </div>
+                <div className='App_Main' >
+                    <Box sx={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            pageSize={5}
+                            rowsPerPageOptions={[5]}
+                            checkboxSelection
+                            disableSelectionOnClick
+                            experimentalFeatures={{ newEditingApi: true }}
+                        />
+                    </Box>
+                </div>
+            </>
         );
     }
 }
 
+class LinkOther extends React.Component {
 
-export class LinkOther extends React.Component {
     render() {
         return (
             <div className='App_Card' align='center' >
                 <a href='https://dev.jonnattan.com/ccu/15173808-7' target='_blank' rel='noreferrer'>
                     <div className='App_Menu' align='center'>
-              Otros test
-            </div>
-          </a>
+                        UCC Test
+                    </div>
+                </a>
             </div>
         );
     }
