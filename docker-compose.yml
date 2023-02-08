@@ -4,6 +4,8 @@ services:
     image: website:v2
     container_name: website
     restart: always
+    env_file:
+      - .env
     ports:
       - "8080:80"
     networks:

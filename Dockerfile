@@ -1,6 +1,6 @@
 FROM node:18-bullseye-slim as build-deps
 
-ENV NODE_ENV=production
+ENV NODE_ENV 'production'
 
 WORKDIR /usr/src/app
 

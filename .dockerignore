@@ -8,3 +8,4 @@ logs/
 logger.log
 Dockerfile*
 docker-compose*.yml
+.env
