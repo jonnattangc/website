@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  compilate-node:
+    image: node18-compilador:v1
+    container_name: compilador_node
+    volumes:
+        - ./:/usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - db-net
+networks:
+  db-net:

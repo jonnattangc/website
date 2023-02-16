@@ -26,7 +26,7 @@ class Jugadores extends React.Component {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
                 }
             });
             var response = await request.json();

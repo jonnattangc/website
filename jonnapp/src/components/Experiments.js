@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Paper, Stack, Box } from '@mui/material';
 import { Dashboard } from './Dashboard'
 import { DataGrid  } from '@mui/x-data-grid';
+// import { GoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 class Experiments extends React.Component {
     render() {
@@ -187,6 +188,7 @@ class LinkOther extends React.Component {
                     <div className='App_Menu' align='center'>
                         UCC Test
                     </div>
+                    |
                 </a>
             </div>
         );

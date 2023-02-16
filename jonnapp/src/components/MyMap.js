@@ -51,7 +51,7 @@ class MapOpenStreet extends React.Component {
         headers: {
             'Content-Type': 'application/json;charset=UTF-8',
             'Accept': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': 'dev.jonnattan.com',
         },
         body: JSON.stringify(dataTx)
     }).catch((error) => { console.error(`[Swap] ERROR:${error}`) })

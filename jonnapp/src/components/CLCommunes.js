@@ -26,8 +26,13 @@ class CLCommunes extends React.Component {
         try {
             this.setState({ loading: true });
             var region_request = await fetch(
-                'https://dev.jonnattan.com/cxp/georeference/api/v1.0/regions', {
+                'https://dev.jonnattan.com/page/cxp/georeference/api/v1.0/regions', {
                 method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                },
             });
             var region_response = await region_request.json();
 
@@ -61,8 +66,13 @@ class CLCommunes extends React.Component {
         try {
             this.setState({ loading: true });
             var communes_request = await fetch(
-                'https://dev.jonnattan.com/cxp/georeference/api/v1.0/coverage-areas?RegionCode=' + region + '&type=1', {
-                method: 'GET'
+                'https://dev.jonnattan.com/page/cxp/georeference/api/v1.0/coverage-areas?RegionCode=' + region + '&type=1', {
+                method: 'GET', 
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                },
             });
             var commune_response = await communes_request.json();
 

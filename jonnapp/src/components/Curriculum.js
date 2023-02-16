@@ -6,7 +6,7 @@ class Curriculum extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { loading: true, data: null, errorMsg: null };
+        this.state = ({ loading: true, data: null, errorMsg: null });
         this.onLoad()
     }
 
@@ -20,7 +20,7 @@ class Curriculum extends React.Component {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
                 }
             });
             if (request.status === 200) {
