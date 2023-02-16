@@ -31,8 +31,7 @@ class CardMemorize extends React.Component {
                 mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json;charset=UTF-8',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(dataTx)
             });

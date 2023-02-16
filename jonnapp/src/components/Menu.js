@@ -51,21 +51,14 @@ class Menu extends React.Component {
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-item nav-link" aria-current="page" href='https://sonarcloud.io/organizations/jonnattan-org/projects' target='_blank' rel='noreferrer' >
+                                    Sonar
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-item nav-link" aria-current="page" href='https://www.condominio-atlantico.com' target='_blank' rel='noreferrer' >
                                     Comunidad
                                 </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#opciones" id="navbarDropdown" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Eventos
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="https://logia.buenaventuracadiz.com/aniversario/ta">Tenida
-                                        Aniversario</a></li>
-                                    <li><a class="dropdown-item" href="https://logia.buenaventuracadiz.com/aniversario/rb">Reunión
-                                        Blanca</a></li>
-                                </ul>
                             </li>
                         </ul>
                     </div>
@@ -76,10 +69,3 @@ class Menu extends React.Component {
 }
 
 export { Menu };
-
-/**
- 
- 
-
-    
-*/
