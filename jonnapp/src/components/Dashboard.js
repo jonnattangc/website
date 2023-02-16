@@ -6,10 +6,7 @@ class Dashboard extends React.Component {
     render() {
         return (
             <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <EnrollChart />
-                </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                     <EnrollChart />
                 </Grid>
             </Grid>
