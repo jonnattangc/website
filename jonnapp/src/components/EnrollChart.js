@@ -49,8 +49,8 @@ const data = [
 class EnrollChart extends PureComponent {
     render() {
         return (
-            <div className='App_Main' align='center' >
-                <LineChart width={500} height={400} data={data} margin={{ top: 50, right: 30, left: 20, bottom: 5, }} >
+            <div className='App_Main'>
+                <LineChart width={500} height={400} data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0, }} >
                     <CartesianGrid strokeDasharray='3 3' />
                     <XAxis dataKey='name' />
                     <YAxis />
