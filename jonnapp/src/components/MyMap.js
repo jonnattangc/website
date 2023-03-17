@@ -32,12 +32,12 @@ class MapOpenStreet extends React.Component {
       lon: 0.0,
       loading: true
     }
-    this.findGeoPos()
+    this.findGeoPos( this.props.address )
   }
 
 
-  async findGeoPos() {
-    var address = this.state.address !== undefined ? this.state.address.trim() : ''
+  async findGeoPos( adrs ) {
+    var address = adrs.trim()
     console.log('Direccion a Buscar: ' + address )
     var url = 'https://dev.jonnattan.com/page/geo/search'
     

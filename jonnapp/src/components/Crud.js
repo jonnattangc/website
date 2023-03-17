@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Grid, Select, MenuItem, TextField, FormControl, Button, Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-
+import ReCAPTCHA from 'react-google-recaptcha';
 
 class Crud extends React.Component {
 
@@ -12,6 +12,10 @@ class Crud extends React.Component {
             message: '',
             loading: true
         };
+    }
+
+    evaluateRecapcha = async ( value ) => {
+        console.log("Captcha value:", value);
     }
 
     render() {
@@ -60,6 +64,9 @@ class Crud extends React.Component {
                                 </div>
                             </Grid>
                         </Grid>
+                    </div>
+                    <div>
+                    <ReCAPTCHA sitekey="6LcjmTMkAAAAAKaIib9Pp0EF6ggS-vd0vl26ImK9" size="compact" onChange={( value ) => this.evaluateRecapcha(value) } />
                     </div>
                 </form>
             </div>
