@@ -107,7 +107,7 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic am9ubmF0dGFuOndzeHphcTEyMw==',
+                    'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
                 },
             });
             var response = await request.json();
@@ -148,7 +148,7 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic am9ubmF0dGFuOndzeHphcTEyMw==',
+                    'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
                 },
             });
             var response = await request.json();

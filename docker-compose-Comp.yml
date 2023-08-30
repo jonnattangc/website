@@ -8,6 +8,7 @@ services:
     environment:
       HCAPTCHA_SECRET: 0xFB70be996d26a5D2A8a369FdC0a80965E478c1C7
       HCAPTCHA_SITE_KEY: f128e428-a147-4aa9-b4db-55c0af0a4381
+      AUTH_JONNA_SERVER: am9ubmF0dGFuOndzeHphcTEyMw==
     ports:
       - "3000:3000"
     networks:
