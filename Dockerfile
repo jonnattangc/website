@@ -13,7 +13,7 @@ WORKDIR /usr/src/app
 COPY ./jonnapp ./jonnapp
 
 RUN cd jonnapp/  && \
-    npm install && \
+    npm install --ignore-scripts && \
     npm run build
 
 FROM nginx:1.12-alpine
