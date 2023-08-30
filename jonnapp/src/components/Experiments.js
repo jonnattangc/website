@@ -24,7 +24,7 @@ class GrafAndEdit extends React.Component {
         return (
             <Grid container spacing={4}>
                 <Grid item xs={6}>
-                    <Crud age={0} />
+                    <Crud/>
                 </Grid>
                 <Grid item xs={6}>
                     <Dashboard />

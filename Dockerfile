@@ -1,5 +1,13 @@
 FROM node:18-bullseye-slim as build-deps
 
+ARG HSECRET=''
+ARG HSITEKEY=''
+ARG JONNAAUTH=''
+
+ENV HCAPTCHA_SECRET=$HSECRET
+ENV HCAPTCHA_SITE_KEY=$HSITEKEY
+ENV AUTH_JONNA_SERVER=$JONNAAUTH
+
 ENV NODE_ENV 'production'
 
 WORKDIR /usr/src/app
@@ -7,7 +15,7 @@ WORKDIR /usr/src/app
 COPY ./jonnapp ./jonnapp
 
 RUN cd jonnapp/  && \
-    npm install && \
+    npm install --ignore-scripts && \
     npm run build
 
 FROM nginx:1.12-alpine
