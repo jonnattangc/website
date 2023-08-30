@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Grid, Select, MenuItem, TextField, FormControl, Button, Box } from '@mui/material';
+import { Grid, Alert, Select, MenuItem, CircularProgress, TextField, FormControl, Button, Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import ReCAPTCHA from 'react-google-recaptcha';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 class Crud extends React.Component {
 
@@ -10,65 +10,239 @@ class Crud extends React.Component {
         this.state = {
             error: false,
             message: '',
-            loading: true
+            genOtp: false,
+            validOtp: false,
+            captcha: false,
+            mobile: '', 
+            len: null , 
+            otp: null , 
+            ref: ''
         };
     }
 
-    evaluateRecapcha = async ( value ) => {
-        console.log("Captcha value:", value);
+    
+    handleVerificationSuccess = async (token, ekey) => {
+        try {
+            await this.validateCapcha(token, ekey)
+        }
+        catch (error) {
+            throw Error(error);
+        }
+    }
+    
+    async validateCapcha( token, ekey ) {
+        try {
+            console.log('HCaptcha token: ', token);
+            console.log('HCaptcha ekey: ', ekey);
+            let data = {
+                token: token,
+                secret: '0xFB70be996d26a5D2A8a369FdC0a80965E478c1C7',
+                sitekey : 'f128e428-a147-4aa9-b4db-55c0af0a4381'
+            }
+            var request = await fetch(
+                'https://dev.jonnattan.com/page/hcaptcha', {
+                method: 'POST', 
+                mode: 'cors',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                },
+            });
+            var response = await request.json();
+
+            if (request.status === 200 ) {
+                console.log('POST : ', response);
+                this.setState({ captcha: response.success });
+            }
+            else {
+                console.log('[405]: ' + request.error);
+                this.setState({ captcha: false });
+            }
+        }
+        catch (error) {
+            //this.setState({ loading: false, errorMsg: error });
+            throw Error(error);
+        }
+    }
+
+     /**
+        * Obtiene las comunas de una regi'on
+        * @param {*} region
+        */
+    generateOtp = async () => {
+        try {
+            const { mobile, len } = this.state;
+            console.log('Mobile: [' + mobile + '] Len: ' + len );
+            this.setState({ genOtp: true, validOtp: false, error: false });
+
+            let mobile_phone = mobile != null ? mobile.replace(' ','') : ''
+            
+            if( mobile_phone.length === 8 )
+                mobile_phone = '569' + mobile_phone 
+            if( mobile_phone.length === 9 )
+                mobile_phone = '56' + mobile_phone 
+            if( mobile_phone.startsWith('+56') )
+                mobile_phone = mobile_phone.replace('+56','56') 
+
+            console.log('Forrmatter number ' + mobile_phone );
+            if ( mobile_phone.length < 10 )
+              this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: response.statusDescription });
+
+            let data = {
+                number_mobile: mobile_phone,
+                duration_min: 5,
+                length_otp : len
+            }
+
+            var request = await fetch(
+                'https://dev.jonnattan.com/page/waza/generate', {
+                method: 'POST',
+                mode: 'cors',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic am9ubmF0dGFuOndzeHphcTEyMw==',
+                },
+            });
+            var response = await request.json();
+            console.log('POST: ', response);
+            if (request.status === 200) {
+                let text = 'Referencia: ' + response.ref
+                this.setState({ genOtp: false, error: false, message: text, captcha: true });
+            }
+            else {
+                console.log('Código Error: ' + response.statusCode);
+                this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: response.statusDescription });
+            }
+        }
+        catch (error) {
+            this.setState({genOtp: false, validOtp: false, error: true, message: error, captcha: false });
+            throw Error(error);
+        }
+    }
+
+     /**
+        * Valida la otp
+        */
+    validateOtp = async () => {
+        const { otp, ref } = this.state;
+        console.log('Otp: ' + otp + ' Ref: ' + ref );
+        try {
+            this.setState({ genOtp: false, validOtp: true, error: false, message:'' });
+            let data = {
+                reference: ref,
+                otp: otp
+            }
+            var request = await fetch(
+                'https://dev.jonnattan.com/page/waza/validate', {
+                method: 'POST',
+                mode: 'cors',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic am9ubmF0dGFuOndzeHphcTEyMw==',
+                },
+            });
+            var response = await request.json();
+
+            if (request.status === 200 ) {
+                if ( response.success )
+                  this.setState({ genOtp: false, validOtp: false, error: false, message: response.statusDescription, captcha: true }); 
+                else 
+                  this.setState({ genOtp: false, validOtp: false, error: true, captcha: true, message: response.statusDescription });
+            }
+            else {
+                console.log('Código Error: ' + response.statusCode);
+                this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: response.statusDescription });
+            }
+        }
+        catch (error) {
+            this.setState({genOtp: false, validOtp: false, error: true, message: error, captcha: false });
+            throw Error(error);
+        }
     }
 
     render() {
-        const { age } = this.props;
-        const { error } = this.state;
+        const { error, captcha, genOtp, validOtp, message } = this.state;
+        const msgType = error ? "error" : "success"
+        const showAlert = message !== ''
         return (
             <div className='App_Main'>
-                <form action="https://dev.jonnattan.com/emulator/page/users/save" method="POST">
                     <div>
-                        <TextField id="nameUser" label="Nombre Usuario" helperText="Usuario de la persona" error={error} size="small" />
-                        <TextField id="pass" label="Contraseña" helperText="Contraseña" type="password" error={error} size="small" />
-                    </div>
-                    <div>
-                        <TextField id="fullName" label="Nombre Completo" helperText="Nombre Completo" error={error} size="small" />
-                        <TextField id="mobile" label="Nombre Completo" helperText="Nombre Completo" error={error} size="small" />
-                        <TextField id="rut" label="Rut" helperText="Rut de la persona" error={error} size="small" /> 
-                        <TextField id="mail" label="Mail" helperText="Mail de la persona" error={error} size="small" />
-                    </div>
-                    <div>
-                        <TextField id="Ciudad" label="Nombre Completo" helperText="Nombre Completo" error={error} size="small" />
-                        <input id="realname" hidden value="realname" />
+                        <TextField id="mobile" label="Teléfono móvil" helperText="Teléfono del destinatario de la Otp"
+                           error={error} size="small" value={this.state.mobile} onChange={(e) => this.setState({ mobile: e.target.value })} />
+                        <TextField id="len"  label="Largo de la Otp" helperText="Cantidad de números de la Otp" 
+                           error={error} size="small" value={this.state.len} onChange={(e) => this.setState({ len: e.target.value })} />
                         <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}> 
-                            <Select labelId="demo-simple-select-label" id="type" value={age} label="Tipo de Usuario">
-                                <MenuItem value={0} selected> Normal </MenuItem>
-                                <MenuItem value={1}>Administrador</MenuItem>
-                                <MenuItem value={2}>Seguridad</MenuItem> </Select>
+                            <Select labelId="minutos" id="type" value="0" label="Duración en minutos">
+                                <MenuItem value={0} selected>5 min.</MenuItem>
+                                <MenuItem value={1}>10 min.</MenuItem>
+                                <MenuItem value={2}>15 min.</MenuItem> 
+                                <MenuItem value={3}>20 min.</MenuItem> 
+                                <MenuItem value={4}>30 min.</MenuItem> 
+                            </Select>
                         </FormControl>
-                        <TextField id="address" label="Dirección" helperText="Direccion" error={error} size="small" />
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     </div>
                     <div style={{ padding: "10px", border: "none" }}>
                         <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <div style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
-                                    <Button type="submit" variant="contained" color="primary" >CSRF</Button>
+                            <Grid item xs={10}>
+                                <div align="right" style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
+                                    <Button type="submit" variant="contained" color="success" disabled={!captcha} onClick={this.generateOtp}>Solicitar OTP</Button>
                                 </div>
                             </Grid>
-                            <Grid item xs={4}>
-                                <div style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
-                                    <Button type="submit" variant="contained" color="success" >Enviar OTP</Button>
-                                </div>
-                            </Grid>
-                            <Grid item xs={4}>
-                                <div style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
-                                    <Button type="submit" variant="contained" color="success" >Validar OTP</Button>
-                                </div>
+                            <Grid item xs={2}>
+                            {
+                                genOtp ? 
+                                    <div align="left">
+                                        <CircularProgress color="success" size="20px"/>
+                                    </div>
+                                : null
+                            }     
                             </Grid>
                         </Grid>
                     </div>
+
                     <div>
-                    <ReCAPTCHA sitekey="6LcjmTMkAAAAAKaIib9Pp0EF6ggS-vd0vl26ImK9" size="compact" onChange={( value ) => this.evaluateRecapcha(value) } />
+                        <TextField id="otp" label="One-Time Password" helperText="Otp Recibida" 
+                        error={error} size="small" value={this.state.otp} onChange={(e) => this.setState({ otp: e.target.value })}  />
+                        <TextField id="ref"  label="Referencia al pedir otp" helperText="Referencia recibida"
+                         error={error} size="small" value={this.state.ref} onChange={(e) => this.setState({ ref: e.target.value })} />
                     </div>
-                </form>
+                    <div style={{ padding: "10px", border: "none" }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={10}>
+                                <div style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
+                                    <Button type="submit" variant="contained" color="primary" disabled={!captcha} onClick={this.validateOtp} >Validar OTP</Button>
+                                </div>
+                            </Grid>
+                            <Grid item xs={2}>
+                            {
+                                validOtp ? 
+                                    <div align="left">
+                                        <CircularProgress color="primary" size="20px" />
+                                    </div>
+                                : null
+                            }     
+                            </Grid>
+                        </Grid>
+                    </div>
+
+                <div>
+                  <HCaptcha sitekey="f128e428-a147-4aa9-b4db-55c0af0a4381" onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} />
+                </div>
+                <div>
+                  {
+                    showAlert ?
+                    <Alert severity={msgType}> {message} </Alert>
+                    : null
+                  }
+                </div>
             </div>
 
         );
