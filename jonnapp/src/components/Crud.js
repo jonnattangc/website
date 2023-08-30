@@ -34,10 +34,12 @@ class Crud extends React.Component {
         try {
             console.log('HCaptcha token: ', token);
             console.log('HCaptcha ekey: ', ekey);
+            console.log('HCaptcha secret: ', process.env.HCAPTCHA_SECRET);
+            console.log('HCaptcha sitekey: ', process.env.HCAPTCHA_SITE_KEY);
             let data = {
                 token: token,
-                secret: '0xFB70be996d26a5D2A8a369FdC0a80965E478c1C7',
-                sitekey : 'f128e428-a147-4aa9-b4db-55c0af0a4381'
+                secret: process.env.HCAPTCHA_SECRET,
+                sitekey : process.env.HCAPTCHA_SITE_KEY
             }
             var request = await fetch(
                 'https://dev.jonnattan.com/page/hcaptcha', {
@@ -88,7 +90,7 @@ class Crud extends React.Component {
 
             console.log('Forrmatter number ' + mobile_phone );
             if ( mobile_phone.length < 10 )
-              this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: response.statusDescription });
+              this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: 'Error de numero mobile' });
 
             let data = {
                 number_mobile: mobile_phone,

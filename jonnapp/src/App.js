@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Container, Alert, AlertTitle, Grid, CircularProgress, TextField } from '@mui/material';
+import { Container, Alert, AlertTitle, Grid, CircularProgress } from '@mui/material';
 
 import { Curriculum } from './components/Curriculum'
 import { Experiments } from './components/Experiments'
@@ -111,15 +111,10 @@ class CheckPages extends React.Component {
 }
 
 class DetailStatus extends React.Component {
-  
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { detail } = this.props
-    const type = detail.status == 2 ? "success" : "error"
-    const msg = detail.status == 2 ? "UP" : "DOWN"
+    const type = detail.status === 2 ? "success" : "error"
+    const msg = detail.status === 2 ? "UP" : "DOWN"
 
     return (
       <div className='App_Card' align='center' >

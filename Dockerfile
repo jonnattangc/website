@@ -1,5 +1,11 @@
 FROM node:18-bullseye-slim as build-deps
 
+ARG HSECRET=''
+ARG HSITEKEY=''
+
+ENV HCAPTCHA_SECRET=$HSECRET
+ENV HCAPTCHA_SITE_KEY=$HSITEKEY
+
 ENV NODE_ENV 'production'
 
 WORKDIR /usr/src/app
