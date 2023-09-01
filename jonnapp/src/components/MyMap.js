@@ -1,8 +1,9 @@
-import React from 'react';
+import React from 'react'
 import PropTypes from 'prop-types'
 import { MapContainer, Marker, Popup, TileLayer, Circle, CircleMarker, Tooltip } from 'react-leaflet'
-import { Paper, Stack, CircularProgress } from '@mui/material';
+import { Paper, Stack, CircularProgress } from '@mui/material'
 import { CLCommunes } from './CLCommunes'
+import env from 'react-dotenv'
 
 class MyMap extends React.Component {
 
@@ -39,19 +40,19 @@ class MapOpenStreet extends React.Component {
   async findGeoPos( adrs ) {
     var address = adrs.trim()
     console.log('Direccion a Buscar: ' + address )
-    var url = 'https://dev.jonnattan.com/page/geo/search'
     
     let dataTx = {
       address: address
     }
 
-    const response = await fetch( url, {
+    const response = await fetch( env.API_BASE_URL + '/page/geo/search', {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json;charset=UTF-8',
             'Accept': 'application/json',
             'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+            'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
         },
         body: JSON.stringify(dataTx)
     }).catch((error) => { console.error(`[Swap] ERROR:${error}`) })

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Grid, Alert, Select, MenuItem, CircularProgress, TextField, FormControl, Button, Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import env from 'react-dotenv';
 
 class Crud extends React.Component {
 
@@ -34,15 +35,14 @@ class Crud extends React.Component {
         try {
             console.log('HCaptcha token: ', token);
             console.log('HCaptcha ekey: ', ekey);
-            console.log('HCaptcha secret: ', process.env.HCAPTCHA_SECRET);
-            console.log('HCaptcha sitekey: ', process.env.HCAPTCHA_SITE_KEY);
+            
             let data = {
                 token: token,
-                secret: process.env.HCAPTCHA_SECRET,
-                sitekey : process.env.HCAPTCHA_SITE_KEY
+                secret: env.HCAPTCHA_SECRET,
+                sitekey : env.HCAPTCHA_SITE_KEY
             }
             var request = await fetch(
-                'https://dev.jonnattan.com/page/hcaptcha', {
+                env.API_BASE_URL + '/page/hcaptcha', {
                 method: 'POST', 
                 mode: 'cors',
                 body: JSON.stringify(data),
@@ -50,6 +50,7 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
             });
             var response = await request.json();
@@ -99,7 +100,7 @@ class Crud extends React.Component {
             }
 
             var request = await fetch(
-                'https://dev.jonnattan.com/page/waza/generate', {
+                env.API_BASE_URL + '/page/waza/generate', {
                 method: 'POST',
                 mode: 'cors',
                 body: JSON.stringify(data),
@@ -107,7 +108,7 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
             });
             var response = await request.json();
@@ -140,7 +141,7 @@ class Crud extends React.Component {
                 otp: otp
             }
             var request = await fetch(
-                'https://dev.jonnattan.com/page/waza/validate', {
+                env.API_BASE_URL + '/page/waza/validate', {
                 method: 'POST',
                 mode: 'cors',
                 body: JSON.stringify(data),
@@ -148,7 +149,7 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
             });
             var response = await request.json();
@@ -236,7 +237,7 @@ class Crud extends React.Component {
                     </div>
 
                 <div>
-                  <HCaptcha sitekey="f128e428-a147-4aa9-b4db-55c0af0a4381" onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} />
+                  <HCaptcha sitekey={env.HCAPTCHA_SITE_KEY} onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} />
                 </div>
                 <div>
                   {
@@ -263,7 +264,7 @@ class MyTable extends React.Component {
     getData = async () => {
         try {
             var request = await fetch(
-                'https://dev.jonnattan.com/emulator/page/users', {
+                env.API_BASE_URL + '/emulator/page/users', {
                 method: 'GET',
             });
             var response = await request.json();

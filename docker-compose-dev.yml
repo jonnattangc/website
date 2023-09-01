@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  compilate-node-20:
+    image: node20-compilador:v1
+    container_name: compilador_node_20
+    volumes:
+        - ./:/usr/src/app
+    env_file:
+      - .envs
+    ports:
+      - "3000:3000"
+    networks:
+      - db-net
+networks:
+  db-net:

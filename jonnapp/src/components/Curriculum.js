@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert, Paper } from '@mui/material';
 import { CargaTexto } from "./CargaTexto";
+import env from 'react-dotenv';
 
 class Curriculum extends React.Component {
 
@@ -16,11 +17,12 @@ class Curriculum extends React.Component {
         try {
             console.info("Entro a obtener el curriculum")
             var request = await fetch(
-                'https://dev.jonnattan.com/page/cv/jonnattan', {
+                env.API_BASE_URL + '/page/cv/jonnattan', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 }
             });
             if (request.status === 200) {

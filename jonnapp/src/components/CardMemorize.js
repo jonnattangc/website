@@ -1,5 +1,5 @@
 import React from 'react';
-
+import env from 'react-dotenv'
 import img_00 from './../images/00.png'
 import img_01 from './../images/01.png'
 import img_02 from './../images/02.png'
@@ -26,18 +26,18 @@ class CardMemorize extends React.Component {
                 state: this.state.visible ? 'down' : 'up'
             }
             var request = await fetch(
-                'https://dev.jonnattan.com/page/memorize/state/save', {
+                env.API_BASE_URL + '/page/memorize/state/save', {
                 method: 'POST',
                 mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json;charset=UTF-8',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
                 body: JSON.stringify(dataTx)
             });
             console.log('POST request: ', request);
             var response = await request.json();
-
             if (request.status === 200) {
                 console.log('POST response: ', response);
                 this.setState({ visible: !this.state.visible });

@@ -41,6 +41,7 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+test-env/
 
 # TypeScript v1 declaration files
 typings/
