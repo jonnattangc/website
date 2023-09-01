@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Grid, Alert, Button, Paper, Stack, Snackbar, IconButton } from '@mui/material';
 import { Dashboard } from './Dashboard'
 import {Crud, MyTable } from './Crud'
+import env from 'react-dotenv';
 
 // import { GoogleReCaptcha } from 'react-google-recaptcha-v3';
 
@@ -131,11 +132,12 @@ function LinkOther() {
     const getData = async () => {
         try {
             var request = await fetch(
-                'https://dev.jonnattan.com/page/aws/contents', {
+                env.API_BASE_URL + '/page/aws/contents', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 }
             });
             var response = await request.json();

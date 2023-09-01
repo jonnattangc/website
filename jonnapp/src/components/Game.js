@@ -1,11 +1,10 @@
 import React from 'react';
 import { Button, Stack } from '@mui/material';
-import { Memorize } from './Memorize'
+import { Memorize } from './Memorize';
+import env from 'react-dotenv';
 
 class Game extends React.Component {
-
     render() {
-        // console.info('Experiments... ' + window.location.pathname);
         return (
             <div className='App_Main' align='center' >
                 <Stack spacing={3}>
@@ -22,11 +21,12 @@ class Jugadores extends React.Component {
     mouseClick = async (e) => {
         try {
             var request = await fetch(
-                'https://dev.jonnattan.com/page/memorize/reset', {
+                env.API_BASE_URL + '/page/memorize/reset', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 }
             });
             var response = await request.json();

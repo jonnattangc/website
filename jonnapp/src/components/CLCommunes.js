@@ -2,6 +2,7 @@ import React from 'react';
 import { Alert, Grid, CircularProgress, TextField, Button } from '@mui/material';
 import Select from 'react-select';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import env from 'react-dotenv'
 
 class CLCommunes extends React.Component {
     constructor(props) {
@@ -28,12 +29,13 @@ class CLCommunes extends React.Component {
         try {
             this.setState({ loading: true });
             var region_request = await fetch(
-                'https://dev.jonnattan.com/page/cxp/georeference/api/v1.0/regions', {
+                env.API_BASE_URL + '/page/cxp/georeference/api/v1.0/regions', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
             });
             var region_response = await region_request.json();
@@ -68,12 +70,13 @@ class CLCommunes extends React.Component {
         try {
             this.setState({ loading: true });
             var communes_request = await fetch(
-                'https://dev.jonnattan.com/page/cxp/georeference/api/v1.0/coverage-areas?RegionCode=' + region + '&type=1', {
+                env.API_BASE_URL + '/page/cxp/georeference/api/v1.0/coverage-areas?RegionCode=' + region + '&type=1', {
                 method: 'GET', 
                 mode: 'cors',
                 headers: {
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
             });
             var commune_response = await communes_request.json();
@@ -141,8 +144,8 @@ class CLCommunes extends React.Component {
             console.log('HCaptcha ekey: ', ekey);
             let data = {
                 response: token,
-                secret: '0xFB70be996d26a5D2A8a369FdC0a80965E478c1C7',
-                sitekey : 'f128e428-a147-4aa9-b4db-55c0af0a4381'
+                secret: env.HCAPTCHA_SECRET,
+                sitekey : env.HCAPTCHA_SITE_KEY
             }
             var request = await fetch(
                 'https://dev.jonnattan.com/page/hcaptcha', {
@@ -153,6 +156,7 @@ class CLCommunes extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 },
             });
             var response = await request.json();
@@ -209,7 +213,7 @@ class CLCommunes extends React.Component {
                         <Grid item xs={4}> 
                         {
                             !captcha ? 
-                              <HCaptcha sitekey="f128e428-a147-4aa9-b4db-55c0af0a4381"
+                              <HCaptcha sitekey={env.HCAPTCHA_SITE_KEY}
                                 onVerify={(token,ekey) => this.handleVerificationSuccess(token, ekey)} />
                             : null
                         }

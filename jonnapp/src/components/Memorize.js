@@ -1,9 +1,7 @@
 import React from 'react';
 import { Paper, Grid } from '@mui/material';
 import { CardMemorize } from './CardMemorize'
-
-
-
+import env from 'react-dotenv';
 
 class Memorize extends React.Component {
 
@@ -16,11 +14,12 @@ class Memorize extends React.Component {
     getCurrentData = async () => {
         try {
             var request = await fetch(
-                'https://dev.jonnattan.com/page/memorize/states', {
+                env.API_BASE_URL + '/page/memorize/states', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
                 }
             });
             var response = await request.json();

@@ -1,16 +1,16 @@
-import './App.css';
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Container, Alert, AlertTitle, Grid, CircularProgress } from '@mui/material';
-
+import './App.css'
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Container, Alert, AlertTitle, Grid, CircularProgress } from '@mui/material'
 import { Curriculum } from './components/Curriculum'
 import { Experiments } from './components/Experiments'
 import { Game } from './components/Game'
 import { Menu } from './components/Menu'
 import { Intranet } from './components/Intranet'
 import { MyMap } from './components/MyMap'
-
+import env from "react-dotenv"
 import img from './images/no_found.png'
+
 function App() {
   return (
     <BrowserRouter>
@@ -55,13 +55,13 @@ class CheckPages extends React.Component {
       this.setState({ loading: true });
 
       var request = await fetch(
-          'https://dev.jonnattan.com/page/status', {
+          env.API_BASE_URL + '/page/status', {
           method: 'GET',
           mode: 'cors',
           headers: {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-              'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
+              'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
           },
       });
       var response = await request.json();
