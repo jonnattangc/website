@@ -174,6 +174,7 @@ class CLCommunes extends React.Component {
 
     render() {
         const { captcha, loading, communes, regions, region, errorMsg } = this.state;
+        const hkey = 'f128e428-a147-4aa9-b4db-55c0af0a4381'
         if (loading)
             return (<div className='App_Main' align='center' > <CircularProgress /> </div>);
         else if (errorMsg != null)
@@ -209,7 +210,7 @@ class CLCommunes extends React.Component {
                         <Grid item xs={4}> 
                         {
                             !captcha ? 
-                              <HCaptcha sitekey="f128e428-a147-4aa9-b4db-55c0af0a4381"
+                              <HCaptcha sitekey={hkey}
                                 onVerify={(token,ekey) => this.handleVerificationSuccess(token, ekey)} />
                             : null
                         }

@@ -1,13 +1,5 @@
 FROM node:18-bullseye-slim as build-deps
 
-ARG HSECRET=''
-ARG HSITEKEY=''
-ARG JONNAAUTH=''
-
-ENV HCAPTCHA_SECRET=$HSECRET
-ENV HCAPTCHA_SITE_KEY=$HSITEKEY
-ENV AUTH_JONNA_SERVER=$JONNAAUTH
-
 ENV NODE_ENV 'production'
 
 WORKDIR /usr/src/app
@@ -27,3 +19,5 @@ ADD ./conf-nginx/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+
+# docker build -t website:vXX --build-arg="HSECRET=XXXX" --build-arg="HSITEKEY=XXXX" --build-arg="JONNAAUTH=XXXX" .

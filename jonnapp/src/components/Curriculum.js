@@ -42,7 +42,8 @@ class Curriculum extends React.Component {
 
     render() {
         const { loading, data, errorMsg} = this.state;
-        return (loading ? <CargaTexto /> : errorMsg != null ? <ErrorCv msg={errorMsg}/> : <CVBase64 data={data} />);
+        // return (loading ? <CargaTexto /> : errorMsg != null ? <ErrorCv msg={errorMsg}/> : <ErrorCv msg={errorMsg}/> <CVBase64 data={data} />);
+        return (loading ? <CargaTexto /> : errorMsg != null ? <ErrorCv msg={errorMsg}/> : <CVBase64 data={data} /> );
     }
 }
 

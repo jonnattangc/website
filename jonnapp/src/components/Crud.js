@@ -34,12 +34,10 @@ class Crud extends React.Component {
         try {
             console.log('HCaptcha token: ', token);
             console.log('HCaptcha ekey: ', ekey);
-            console.log('HCaptcha secret: ', process.env.HCAPTCHA_SECRET);
-            console.log('HCaptcha sitekey: ', process.env.HCAPTCHA_SITE_KEY);
             let data = {
                 token: token,
-                secret: process.env.HCAPTCHA_SECRET,
-                sitekey : process.env.HCAPTCHA_SITE_KEY
+                secret: '0xFB70be996d26a5D2A8a369FdC0a80965E478c1C7',
+                sitekey : 'f128e428-a147-4aa9-b4db-55c0af0a4381'
             }
             var request = await fetch(
                 'https://dev.jonnattan.com/page/hcaptcha', {
@@ -107,9 +105,10 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic am9ubmF0dGFuOndzeHphcTEyMw==' 
                 },
             });
+
             var response = await request.json();
             console.log('POST: ', response);
             if (request.status === 200) {
@@ -148,7 +147,7 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + process.env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic am9ubmF0dGFuOndzeHphcTEyMw=='
                 },
             });
             var response = await request.json();
@@ -174,6 +173,7 @@ class Crud extends React.Component {
         const { error, captcha, genOtp, validOtp, message } = this.state;
         const msgType = error ? "error" : "success"
         const showAlert = message !== ''
+        const hkey = 'f128e428-a147-4aa9-b4db-55c0af0a4381'
         return (
             <div className='App_Main'>
                     <div>
@@ -236,7 +236,7 @@ class Crud extends React.Component {
                     </div>
 
                 <div>
-                  <HCaptcha sitekey="f128e428-a147-4aa9-b4db-55c0af0a4381" onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} />
+                  <HCaptcha sitekey={hkey} onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} />
                 </div>
                 <div>
                   {
