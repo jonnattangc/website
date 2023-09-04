@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Grid, Alert, Button, Paper, Stack, Snackbar, IconButton } from '@mui/material';
 import { Dashboard } from './Dashboard'
 import {Crud, MyTable } from './Crud'
-import {MyWebcam} from './MyWebcam'
 import env from 'react-dotenv';
 
 // import { GoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -14,7 +13,6 @@ class Experiments extends React.Component {
                 <Stack spacing={1}>
                     <FirsRow /> 
                     <TwoRow />
-                    <BtnsTest />
                 </Stack>
             </div>
         )
@@ -41,7 +39,7 @@ class TwoRow extends React.Component {
         return (
             <Grid container spacing={1}>
                 <Grid item xs={6}>
-                <Paper elevation={4}> <MyWebcam /> </Paper> 
+                <Paper elevation={4}> <BtnsTest /> </Paper> 
                 </Grid>
                 <Grid item xs={6}>
                 <Paper elevation={4}>  <Dashboard /> </Paper> 
