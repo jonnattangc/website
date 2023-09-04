@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .env
+**/*env.*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -41,7 +42,7 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
-test-env/
+test-*/
 
 # TypeScript v1 declaration files
 typings/

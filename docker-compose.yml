@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   web:
-    image: website:v2
+    image: website:v3.0
     container_name: website
     restart: always
     env_file:

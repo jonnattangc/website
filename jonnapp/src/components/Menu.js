@@ -36,8 +36,8 @@ class Menu extends React.Component {
                                 </NavLink>
                             </li>
                             <li class="nav-item">
-                                <NavLink to="/private" class="nav-item nav-link">
-                                    <div class="nav-item nav-link" > Intranet </div>
+                                <NavLink to="/webcam" class="nav-item nav-link">
+                                    <div class="nav-item nav-link" > Webcam </div>
                                 </NavLink>
                             </li>
                             <li class="nav-item">

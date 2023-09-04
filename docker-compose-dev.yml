@@ -6,7 +6,7 @@ services:
     volumes:
         - ./:/usr/src/app
     env_file:
-      - .envs
+      - .envs-dev
     ports:
       - "3000:3000"
     networks:
