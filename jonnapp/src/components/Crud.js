@@ -262,9 +262,11 @@ class MyTable extends React.Component {
     }
 
     getData = async () => {
+        let url = env.API_BASE_URL + '/emulator/page/users'
+
         try {
             var request = await fetch(
-                env.API_BASE_URL + '/emulator/page/users', {
+                url, {
                 method: 'GET',
             });
             var response = await request.json();

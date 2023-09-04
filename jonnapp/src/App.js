@@ -8,6 +8,7 @@ import { Game } from './components/Game'
 import { Menu } from './components/Menu'
 import { Intranet } from './components/Intranet'
 import { MyMap } from './components/MyMap'
+import { MyWebcam } from './components/MyWebcam'
 import env from "react-dotenv"
 import img from './images/no_found.png'
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/check" exact element={<CheckPages/>} />
           <Route path="/maps" exact element={ <MyMap/>} />
           <Route path="/private"  exact element={<Intranet/>} />
+          <Route path="/webcam"  exact element={<MyWebcam/>} />
           <Route path='*' element={<NoFound />} />
         </Routes>
       </Container >
