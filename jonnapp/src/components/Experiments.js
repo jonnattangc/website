@@ -9,12 +9,10 @@ import env from 'react-dotenv';
 class Experiments extends React.Component {
     render() {
         return (
-            <div className='App_Main' align='center' >
-                <Stack spacing={1}>
-                    <FirsRow /> 
-                    <TwoRow />
-                </Stack>
-            </div>
+            <Stack spacing={1}>
+                <FirsRow /> 
+                <TwoRow />
+            </Stack>
         )
     }
 }
