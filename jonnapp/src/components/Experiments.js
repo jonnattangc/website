@@ -150,17 +150,18 @@ function BtnsTest() {
                 mode: 'cors',
                 headers: {
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+                    'x-api-key': env.PAGE_API_KEY
                 }
             });
             var response = await request.json();
             if (request.status === 200) {
                 var photos = []
-                response.photos.forEach(photo => {
+                response.data.photos.forEach(photo => {
                     photos.push(photo);
                 });
                 var docs = []
-                response.docs.forEach(doc => {
+                response.data.docs.forEach(doc => {
                     docs.push(doc);
                 });
                 // this.setState({ photos: photos, docs: docs })

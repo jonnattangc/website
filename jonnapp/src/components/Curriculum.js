@@ -15,20 +15,21 @@ class Curriculum extends React.Component {
         let dataCV = null
         let msgError = null
         try {
-            console.info("Entro a obtener el curriculum")
+            console.info("Entro a obtener el curriculum: ", env.PAGE_API_KEY)
             var request = await fetch(
                 env.API_BASE_URL + '/page/cv/jonnattan', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+                    'x-api-key': env.PAGE_API_KEY
                 }
             });
             if (request.status === 200) {
                 var response = await request.json();
-                console.log('GET Name: ', response.name);
-                response.data !== '' ? dataCV = response.data : msgError = 'El CV de ' + response.name + ' no se ha recuperado'  
+                console.log('GET Name: ', response.data.name);
+                response.data !== '' ? dataCV = response.data.cv : msgError = 'El CV de ' + response.data.name + ' no se ha recuperado'  
             }
             else {
                 console.log('[405]: ' + request.error)
