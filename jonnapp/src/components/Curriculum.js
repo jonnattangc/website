@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Paper } from '@mui/material';
+import { Alert, Paper, Grid } from '@mui/material';
 import { CargaTexto } from "./CargaTexto";
 import env from 'react-dotenv';
 
@@ -64,10 +64,24 @@ class CVBase64 extends React.Component {
     render() {
         const { data } = this.props;
         return (
-            <div className='App_Main' align='center' >
-                <Paper elevation={8}>
-                    <iframe title='Curriculum Jonnattan' width='100%' height='600px' src={'data:application/pdf;base64,' + data} />
-                </Paper>
+            <div className='App_Main' >
+              <Grid container rowSpacing={5} columnSpacing={0} >
+                <Grid item xs={10}>
+                    <p><h5>Hola Mundo !</h5></p>
+                    <p>Mi nombre es Jonnattan, vivo en la ciudad de Viña del Mar, en Chile, desarrollé este sitio (que jamás termina) para mostrar al mundo mis experimentos realizados en los momentos de ocio. 
+                        Muchos de uds se preguntarán: “por que me dedico a programar en vez de hacer otras cosas como ver tv o estar en la playa”. La respuesta es sencilla: ni yo lo entiendo claramente, creo que es por la curiosidad de aprender y de experimentar, 
+                        pero además por un poco de miedo quizas de quedar añejo con mis conocimientos de programación.
+                        En fin, en <a href='https://www.jonnattan.com' target='_blank' rel='noreferrer' >mi blog</a> pueden encontrar algunas cosas como mis gustos y forma de pensar. Este sitio es solo dedicado a mis proyectos personales y materializar 
+                        los conocimientos que he adquirido. Todos los códigos fuente están disponibles en mi <a href='https://github.com/jonnattangc' target='_blank' rel='noreferrer'>GitHub</a>.
+                    </p>
+                    <p>
+                        Espero que sea se su agrado. Jonnattan :)
+                    </p>
+                </Grid>
+                <Grid item xs={2} >
+                  <Paper elevation={8}> <iframe title='Curriculum Jonnattan' width='95%' height='250px' src={'data:application/pdf;base64,' + data} /></Paper>
+                </Grid>
+              </Grid>
             </div>
         );
     }
