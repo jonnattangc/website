@@ -1,10 +1,17 @@
 import React from 'react';
-import { Alert, Paper, Grid } from '@mui/material';
+import { Alert, Paper, Grid, Stack } from '@mui/material';
 import { CargaTexto } from "./CargaTexto";
 import env from 'react-dotenv';
 
 class Curriculum extends React.Component {
 
+/**
+ * Initializes the Curriculum component.
+ *
+ * @param {Object} props - The properties passed to the component.
+ * Sets the initial state with loading, data, and errorMsg properties.
+ * Calls the onLoad method to fetch curriculum data.
+ */
     constructor(props) {
         super(props);
         this.state = ({ loading: true, data: null, errorMsg: null });
@@ -29,7 +36,7 @@ class Curriculum extends React.Component {
             if (request.status === 200) {
                 var response = await request.json();
                 console.log('GET Name: ', response.data.name);
-                response.data !== '' ? dataCV = response.data.cv : msgError = 'El CV de ' + response.data.name + ' no se ha recuperado'  
+                response.data !== '' ? dataCV = response.data.cv : msgError = 'El CV de ' + response.data.name + ' no se ha recuperado'
             }
             else {
                 console.log('[405]: ' + request.error)
@@ -44,46 +51,57 @@ class Curriculum extends React.Component {
     }
 
     render() {
-        const { loading, data, errorMsg} = this.state;
-        return (loading ? <CargaTexto /> : errorMsg != null ? <ErrorCv msg={errorMsg}/> : <CVBase64 data={data} />);
+        const { loading, data, errorMsg } = this.state;
+        return (
+            <div class="App_Main">
+              <Stack spacing={1}>
+                <Grid container rowSpacing={2} columnSpacing={2} >
+                    <Grid item xs={10}>
+                        <Paper elevation={1}>
+                            <QuienSoy />
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={2} >
+                        <Paper elevation={1}>
+                            {
+                                loading ? <CargaTexto /> : errorMsg != null ? <ErrorCv msg={errorMsg} /> : <CVBase64 data={data} />
+                            }
+                        </Paper>
+                    </Grid>
+                </Grid>
+              </Stack>
+            </div>
+        );
     }
 }
 
+class QuienSoy extends React.Component {
+    render() {
+        return (<div >
+            <h5>Hola Mundo !</h5>
+            <p>Mi nombre es Jonnattan, actualmente vivo en la ciudad de Viña del Mar, en Chile, la intensción de desarrllar este sitio (que jamás termina) es mostrar al mundo mis experimentos realizados en los momentos de ocio.
+                Muchos se preguntarán: “por qué me dedico a programar en vez de hacer otras cosas como ver tv o estar en la playa”. La respuesta es sencilla: ni yo lo entiendo claramente, pero creo que es, principalmente, porque me gusta y por la curiosidad de aprender y experimentar con nuevas cosas del área de programación,
+                Además (debo reconocer), por un poco de miedo a quedar añejo con mis conocimientos de programación.
+                En fin, en <a href='https://www.jonnattan.com' target='_blank' rel='noreferrer' >mi blog</a> pueden encontrar algunas cosas como mis gustos y forma de pensar. Este sitio es sólo dedicado a mis proyectos personales no comerciales y a compartir conocimientos 
+                de programación. Todos los códigos fuentes - incluso de esta pagina - están disponibles en <a href='https://github.com/jonnattangc' target='_blank' rel='noreferrer'>GitHub</a>.
+            </p>
+            <p>
+                Espero que sea de su agrado el contenido, </p>
+            <p>salu2 Jonnattan :)</p>
+        </div>);
+    }
+}
 class ErrorCv extends React.Component {
     render() {
         const msg = this.props.msg
-        return (<div className='App_Main' align='center' >
-            <Paper elevation={8}>
-                <Alert severity="error">{msg}</Alert>
-            </Paper>
-        </div>);
+        return (<div align='center' > <Alert severity="error">{msg}</Alert></div>);
     }
 }
 
 class CVBase64 extends React.Component {
     render() {
         const { data } = this.props;
-        return (
-            <div className='App_Main' >
-              <Grid container rowSpacing={5} columnSpacing={0} >
-                <Grid item xs={10}>
-                    <p><h5>Hola Mundo !</h5></p>
-                    <p>Mi nombre es Jonnattan, vivo en la ciudad de Viña del Mar, en Chile, desarrollé este sitio (que jamás termina) para mostrar al mundo mis experimentos realizados en los momentos de ocio. 
-                        Muchos de uds se preguntarán: “por que me dedico a programar en vez de hacer otras cosas como ver tv o estar en la playa”. La respuesta es sencilla: ni yo lo entiendo claramente, creo que es por la curiosidad de aprender y de experimentar, 
-                        pero además por un poco de miedo quizas de quedar añejo con mis conocimientos de programación.
-                        En fin, en <a href='https://www.jonnattan.com' target='_blank' rel='noreferrer' >mi blog</a> pueden encontrar algunas cosas como mis gustos y forma de pensar. Este sitio es solo dedicado a mis proyectos personales y materializar 
-                        los conocimientos que he adquirido. Todos los códigos fuente están disponibles en mi <a href='https://github.com/jonnattangc' target='_blank' rel='noreferrer'>GitHub</a>.
-                    </p>
-                    <p>
-                        Espero que sea se su agrado. Jonnattan :)
-                    </p>
-                </Grid>
-                <Grid item xs={2} >
-                  <Paper elevation={8}> <iframe title='Curriculum Jonnattan' width='95%' height='250px' src={'data:application/pdf;base64,' + data} /></Paper>
-                </Grid>
-              </Grid>
-            </div>
-        );
+        return ( data ? <div > <iframe title='Curriculum Jonnattan' width='95%' height='250px' src={'data:application/pdf;base64,' + data} /> </div> : null);
     }
 }
 

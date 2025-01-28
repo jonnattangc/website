@@ -29,6 +29,7 @@
   text-align: 'center';
   align-items: 'center';
   border: none;
+  flex-direction: column;
 }
 
 .App_LeafMap {
