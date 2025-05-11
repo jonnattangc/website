@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper, Grid } from '@mui/material';
+import { Paper, Grid, CircularProgress } from '@mui/material';
 import { CardMemorize } from './CardMemorize'
 import env from 'react-dotenv';
 
@@ -25,7 +25,7 @@ class Memorize extends React.Component {
             });
             var response = await request.json();
             if (request.status === 200) {
-                console.log('GET Response: ', response);
+                console.log('GET Response States: ', response);
                 var card_state = [];
                 response.data.forEach(state => {
                     card_state.push({
@@ -60,11 +60,17 @@ class Memorize extends React.Component {
         }
 
         return (
-            <Grid container spacing={2}>
+            <div align="center">
                 {
-                    listItems
+                    listItems ? 
+                    <Grid container spacing={2}>
+                    { 
+                      listItems
+                    } 
+                    </Grid>
+                    : <CircularProgress color="success" size={50}/>
                 }
-            </Grid>
+            </div>
         );
     }
 }
