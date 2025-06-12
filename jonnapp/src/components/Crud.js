@@ -36,28 +36,30 @@ class Crud extends React.Component {
             console.log('HCaptcha token: ', token);
             console.log('HCaptcha ekey: ', ekey);
             
-            let data = {
+            let data_captcha = {
                 token: token,
                 secret: env.HCAPTCHA_SECRET,
                 sitekey : env.HCAPTCHA_SITE_KEY
             }
+
             var request = await fetch(
                 env.API_BASE_URL + '/page/hcaptcha', {
                 method: 'POST', 
                 mode: 'cors',
-                body: JSON.stringify(data),
+                body: JSON.stringify({'data': data_captcha}),
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+                    'x-api-key': env.PAGE_API_KEY
                 },
             });
             var response = await request.json();
 
             if (request.status === 200 ) {
                 console.log('POST : ', response);
-                this.setState({ captcha: response.success });
+                this.setState({ captcha: response.data.success });
             }
             else {
                 console.log('[405]: ' + request.error);
@@ -108,7 +110,8 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+                    'x-api-key': env.PAGE_API_KEY
                 },
             });
             var response = await request.json();
@@ -149,7 +152,8 @@ class Crud extends React.Component {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+                    'x-api-key': env.PAGE_API_KEY
                 },
             });
             var response = await request.json();
@@ -258,7 +262,7 @@ class MyTable extends React.Component {
         this.state = {
             rows: []
         };
-        this.getData();
+        //this.getData();
     }
 
     getData = async () => {

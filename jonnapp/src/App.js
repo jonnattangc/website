@@ -63,7 +63,8 @@ class CheckPages extends React.Component {
           headers: {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-              'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+              'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+              'x-api-key': env.PAGE_API_KEY
           },
       });
       var response = await request.json();

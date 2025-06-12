@@ -21,7 +21,7 @@ class CardMemorize extends React.Component {
 
     changeState = async () => {
         try {
-            let dataTx = {
+            let dataJson = {
                 card: this.state.name,
                 state: this.state.visible ? 'down' : 'up'
             }
@@ -32,15 +32,16 @@ class CardMemorize extends React.Component {
                 headers: {
                     'Content-Type': 'application/json;charset=UTF-8',
                     'Accept': 'application/json',
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER
+                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+                    'x-api-key': env.PAGE_API_KEY
                 },
-                body: JSON.stringify(dataTx)
+                body: JSON.stringify( { 'data': dataJson } )
             });
-            console.log('POST request: ', request);
+            console.log('POST request: ', request );
             var response = await request.json();
             if (request.status === 200) {
                 console.log('POST response: ', response);
-                this.setState({ visible: !this.state.visible });
+                this.setState({ visible: response.data.visible });
             }
             else {
                 console.log('[405]: ' + request.error);

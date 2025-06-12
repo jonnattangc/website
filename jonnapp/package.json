@@ -57,7 +57,11 @@
       "HCAPTCHA_SECRET",
       "HCAPTCHA_SITE_KEY",
       "AUTH_JONNA_SERVER",
-      "API_BASE_URL"
+      "API_BASE_URL",
+      "UCC_API_KEY",
+      "PAGE_API_KEY",
+      "LOGIA_API_KEY",
+      "GEO_API_KEY"
     ]
   }
 }
