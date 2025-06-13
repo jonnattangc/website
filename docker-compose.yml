@@ -1,11 +1,12 @@
 version: '3.9'
 services:
-  web:
-    image: website:v3.1
-    container_name: website
+  website:
+    build: .
+    image: website:prd
+    container_name: website-jonnattan
     restart: always
     env_file:
-      - .env
+      - ../envs/website.env
     ports:
       - "8080:80"
     networks:

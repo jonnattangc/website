@@ -1,15 +1,19 @@
 version: '3.9'
 services:
-  compilate-node-20:
-    image: node20-compilador:v1
-    container_name: compilador_node_20
+  website:
+    container_name: website-jonnattan
+    image: website:dev
+    build: 
+      dockerfile: Dockerfile-dev
+    restart: always
     volumes:
         - ./:/usr/src/app
     env_file:
-      - .envs-dev
+      - ../envs/website.env
     ports:
       - "8080:3000"
     networks:
       - db-net
+    # command: tail -f /home/logia/requirements.txt
 networks:
   db-net:
