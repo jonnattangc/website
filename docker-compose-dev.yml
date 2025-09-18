@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   website:
     container_name: website-jonnattan

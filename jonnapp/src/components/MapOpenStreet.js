@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { MapContainer, Marker, Popup, TileLayer, Tooltip, LayerGroup, Circle } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, Tooltip, Circle } from 'react-leaflet'
 
 export class MapOpenStreet extends React.Component {
 
@@ -16,7 +16,7 @@ export class MapOpenStreet extends React.Component {
     }
 
     render() {
-        const { title, detail, center, point, zoom } = this.state;
+        const { title, detail, center, zoom } = this.state;
         const fillRedOptions = { fillColor: 'green' }
 
         console.log('Centro: ', center)

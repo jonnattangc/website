@@ -2,13 +2,12 @@ import './App.css'
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Container, Alert, AlertTitle, Grid, CircularProgress } from '@mui/material'
-import { Curriculum } from './components/Curriculum'
+import { Home } from './components/Home'
 import { Experiments } from './components/Experiments'
 import { Game } from './components/Game'
 import { Menu } from './components/Menu'
 import { Intranet } from './components/Intranet'
-import { MyMap } from './components/MyMap'
-import { MyWebcam } from './components/MyWebcam'
+import { Chat } from './components/Chat'
 import env from "react-dotenv"
 import img from './images/no_found.png'
 
@@ -18,13 +17,12 @@ function App() {
       <Container maxWidth='xl'>
         <Menu />
         <Routes>
-          <Route path="/" exact element={<Curriculum />} />
+          <Route path="/" exact element={<Home />} />
           <Route path="/experiments" exact element={<Experiments/>} />
           <Route path="/game" exact element={<Game/>} />
           <Route path="/check" exact element={<CheckPages/>} />
-          <Route path="/maps" exact element={ <MyMap/>} />
+          <Route path="/chat"  exact element={<Chat/>} />
           <Route path="/private"  exact element={<Intranet/>} />
-          <Route path="/webcam"  exact element={<MyWebcam/>} />
           <Route path='*' element={<NoFound />} />
         </Routes>
       </Container >

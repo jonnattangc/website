@@ -50,6 +50,7 @@ class MyWebcam extends React.Component {
         headers: {
           'Access-Control-Allow-Origin': 'dev.jonnattan.com',
           'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+          'x-api-key': env.PAGE_API_KEY,
           'Content-Type': 'application/json;charset=UTF-8',
           'Accept': 'application/json',
         },
@@ -58,7 +59,8 @@ class MyWebcam extends React.Component {
 
       if (request.status === 200) {
         let response = await request.json();
-        this.setState({ loading: false, msg: response.msg, urlImage: response.url })
+        console.log('[200]: ' + response.data.code + ' ' + response.data.url);
+        this.setState({ loading: false, msg: response.message, urlImage: response.data.url })
       }
       else {
         console.log('[409]: ' + request.error);
