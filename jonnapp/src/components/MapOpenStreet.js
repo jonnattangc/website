@@ -19,8 +19,7 @@ export class MapOpenStreet extends React.Component {
         const { title, detail, center, zoom } = this.state;
         const fillRedOptions = { fillColor: 'green' }
 
-        console.log('Centro: ', center)
-        console.log('Direccion: ', detail)
+        console.log('window.location.origi##############: ', window.location.origin)
 
         return (
             <div className='App_LeafMap' align='center'>

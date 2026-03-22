@@ -41,7 +41,7 @@ class Crud extends React.Component {
                 secret: env.HCAPTCHA_SECRET,
                 sitekey : env.HCAPTCHA_SITE_KEY
             }
-
+            const origin = window.location.origin.replace('https://', '');
             var request = await fetch(
                 env.API_BASE_URL + '/page/hcaptcha', {
                 method: 'POST', 
@@ -50,7 +50,7 @@ class Crud extends React.Component {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 },
@@ -100,7 +100,7 @@ class Crud extends React.Component {
                 duration_min: 5,
                 length_otp : len
             }
-
+            const origin = window.location.origin.replace('https://', '');
             var request = await fetch(
                 env.API_BASE_URL + '/page/waza/generate', {
                 method: 'POST',
@@ -109,7 +109,7 @@ class Crud extends React.Component {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 },
@@ -143,6 +143,7 @@ class Crud extends React.Component {
                 reference: ref,
                 otp: otp
             }
+            const origin = window.location.origin.replace('https://', '');
             var request = await fetch(
                 env.API_BASE_URL + '/page/waza/validate', {
                 method: 'POST',
@@ -151,7 +152,7 @@ class Crud extends React.Component {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 },

@@ -31,6 +31,15 @@ class QuienSoy extends React.Component {
             <p>
                 Espero que sea de su agrado el contenido, </p>
             <p>Salu2 :)</p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
+            <p>&nbsp; </p>
         </div>);
     }
 }

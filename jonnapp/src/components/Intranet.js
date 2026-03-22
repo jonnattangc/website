@@ -25,7 +25,7 @@ class Intranet extends React.Component {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': window.location.origin,
                     'x-api-key': env.PAGE_API_KEY
                 }
             });
@@ -53,7 +53,7 @@ class Intranet extends React.Component {
             return (<div className='App_Main' align='center' > Solicitando autorización <Spinner animation="border" variant="success" /> </div>);
         else if (authorized)
             return (
-                <div class="App_Main">
+                <div className="App_Main">
                     <Stack spacing={1}>
                         <Grid container rowSpacing={2} columnSpacing={2} >
                             <Grid item xs={9}>

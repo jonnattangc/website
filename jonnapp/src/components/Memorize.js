@@ -13,12 +13,13 @@ class Memorize extends React.Component {
 
     getCurrentData = async () => {
         try {
+            const origin = window.location.origin.replace('https://', '');
             var request = await fetch(
                 env.API_BASE_URL + '/page/memorize/states', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 }

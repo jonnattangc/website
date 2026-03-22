@@ -32,13 +32,14 @@ export class CLCommunes extends React.Component {
     getRegions = async () => {
         try {
             this.setState({ loading_reg: true });
+            const origin = window.location.origin.replace('https://', '');
             var region_request = await fetch(
                 env.API_BASE_URL + '/geo/regions', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.GEO_API_KEY
                 },
@@ -63,8 +64,8 @@ export class CLCommunes extends React.Component {
             }
         }
         catch (error) {
-            this.setState({ loading: false, errorMsg: error });
-            throw Error(error);
+            this.setState({ loading: false, errorMsg: error.message || "Algo salió mal" });
+            throw error;
         }
     }
     /**
@@ -74,13 +75,14 @@ export class CLCommunes extends React.Component {
     getCommunes = async (region) => {
         try {
             this.setState({ loading_reg: true });
+            const origin = window.location.origin.replace('https://', '');
             var communes_request = await fetch(
                 env.API_BASE_URL + '/geo/' + region + '/communes', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
                     'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.GEO_API_KEY
                 },
@@ -105,8 +107,8 @@ export class CLCommunes extends React.Component {
             }
         }
         catch (error) {
-            this.setState({ loading: false, errorMsg: error });
-            throw Error(error);
+            this.setState({ loading: false, errorMsg: error.message || "Algo salió mal" });
+            throw error;
         }
     }
 
@@ -116,8 +118,8 @@ export class CLCommunes extends React.Component {
             this.setState({ commune: event.label });
         }
         catch (error) {
-            this.setState({ loading: false, errorMsg: error });
-            throw Error(error);
+            this.setState({ loading: false, errorMsg: error || "Algo salió mal" });
+            throw error;
         }
     }
 
@@ -149,13 +151,14 @@ export class CLCommunes extends React.Component {
 
     findGeoPos = async (dataTx) => {
         let jsonrx = null
+        const origin = window.location.origin.replace('https://', '');
         var request = await fetch(env.API_BASE_URL + '/geo/search', {
             method: 'POST',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json;charset=UTF-8',
                 'Accept': 'application/json',
-                'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                'Access-Control-Allow-Origin': origin,
                 'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                 'x-api-key': env.GEO_API_KEY
             },
@@ -212,6 +215,7 @@ export class CLCommunes extends React.Component {
                 secret: env.HCAPTCHA_SECRET,
                 sitekey: env.HCAPTCHA_SITE_KEY
             }
+            const origin = window.location.origin.replace('https://', '');
             var request = await fetch(
                 env.API_BASE_URL + '/page/hcaptcha', {
                 method: 'POST',
@@ -220,7 +224,7 @@ export class CLCommunes extends React.Component {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 },

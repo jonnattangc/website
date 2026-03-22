@@ -10,24 +10,31 @@ import { Intranet } from './components/Intranet'
 import { Chat } from './components/Chat'
 import env from "react-dotenv"
 import img from './images/no_found.png'
+import { Footer } from './components/Footer'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Container maxWidth='xl'>
-        <Menu />
-        <Routes>
-          <Route path="/" exact element={<Home />} />
-          <Route path="/experiments" exact element={<Experiments/>} />
-          <Route path="/game" exact element={<Game/>} />
-          <Route path="/check" exact element={<CheckPages/>} />
-          <Route path="/chat"  exact element={<Chat/>} />
-          <Route path="/private"  exact element={<Intranet/>} />
-          <Route path='*' element={<NoFound />} />
-        </Routes>
-      </Container >
-    </BrowserRouter>
-  );
+    <div>
+      <div>
+        <BrowserRouter>
+          <Container maxWidth='xl'>
+            <Menu />
+            <Routes>
+              <Route path="/" exact element={<Home />} />
+              <Route path="/experiments" exact element={<Experiments />} />
+              <Route path="/game" exact element={<Game />} />
+              <Route path="/check" exact element={<CheckPages />} />
+              <Route path="/chat" exact element={<Chat />} />
+              <Route path="/private" exact element={<Intranet />} />
+              <Route path='*' element={<NoFound />} />
+            </Routes>
+          </Container >
+        </BrowserRouter>
+      </div>
+        <footer className="footer">
+          <Footer />
+        </footer>
+    </div>);
 }
 
 class NoFound extends React.Component {
@@ -39,41 +46,42 @@ class NoFound extends React.Component {
 }
 
 class CheckPages extends React.Component {
-  
+
   constructor(props) {
     super(props);
     this.state = {
-        loading: true,
-        msg: null,
-        monitors: []
+      loading: true,
+      msg: null,
+      monitors: []
     };
     this.statusRequest()
   }
-  
+
   statusRequest = async () => {
     try {
       this.setState({ loading: true });
-
+      console.log('Iniciando petición de estado de páginas...');
+      const origin = window.location.origin.replace('https://', '');
       var request = await fetch(
-          env.API_BASE_URL + '/page/status', {
-          method: 'GET',
-          mode: 'cors',
-          headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-              'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-              'x-api-key': env.PAGE_API_KEY
-          },
+        env.API_BASE_URL + '/page/status', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': origin,
+          'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+          'x-api-key': env.PAGE_API_KEY
+        },
       });
       var response = await request.json();
       console.log('GET: ', response);
       if (request.status === 200) {
-        if( response.data.stat === 'ok' )
+        if (response.data.stat === 'ok')
           this.setState({ loading: false, msg: null, monitors: response.data.monitors });
       }
       else {
-          console.log('Código Error: ' + response.data.stat );
-          this.setState({ loading: false, msg: "error", monitors: [] });
+        console.log('Código Error: ' + response.data.stat);
+        this.setState({ loading: false, msg: "error", monitors: [] });
       }
     }
     catch (error) {
@@ -93,19 +101,20 @@ class CheckPages extends React.Component {
     else {
       if (monitors != null) {
         listItems = monitors.map((monitor) =>
-            <Grid item xs={6}>
-                <DetailStatus detail={monitor}/> 
-            </Grid>
+          <Grid item xs={6} key={monitor.id}>
+            <DetailStatus detail={monitor} />
+          </Grid>
         )
       }
       return (
-          <div className='App_Main' align='center' >
-              <Grid container spacing={2}>
-                {
-                  listItems
-                } 
-              </Grid>
-          </div>
+        <div className='App_Main' align='center' >
+          <Grid container spacing={2}>
+            {
+              listItems
+            }
+          </Grid>
+          <p>&nbsp; </p>
+        </div>
       );
     }
   }
@@ -120,8 +129,8 @@ class DetailStatus extends React.Component {
     return (
       <div className='App_Card' align='center' >
         <Alert severity={type} >
-            <AlertTitle>{msg}</AlertTitle>
-                El sitio {detail.friendly_name} <strong> {detail.url} </strong>
+          <AlertTitle>{msg}</AlertTitle>
+          El sitio {detail.friendly_name} <strong> {detail.url} </strong>
         </Alert>
       </div>);
   }
