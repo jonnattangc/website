@@ -1,7 +1,8 @@
 import './App.css'
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Container, Alert, AlertTitle, Grid, CircularProgress } from '@mui/material'
+import { Container, Alert, AlertTitle, Grid, CircularProgress, Box } from '@mui/material'
+import { ThemeProvider, CssBaseline } from '@mui/material'
 import { Home } from './components/Home'
 import { Experiments } from './components/Experiments'
 import { Game } from './components/Game'
@@ -11,30 +12,33 @@ import { Chat } from './components/Chat'
 import env from "react-dotenv"
 import img from './images/no_found.png'
 import { Footer } from './components/Footer'
+import theme from './theme'
 
 function App() {
   return (
-    <div>
-      <div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <BrowserRouter>
-          <Container maxWidth='xl'>
-            <Menu />
-            <Routes>
-              <Route path="/" exact element={<Home />} />
-              <Route path="/experiments" exact element={<Experiments />} />
-              <Route path="/game" exact element={<Game />} />
-              <Route path="/check" exact element={<CheckPages />} />
-              <Route path="/chat" exact element={<Chat />} />
-              <Route path="/private" exact element={<Intranet />} />
-              <Route path='*' element={<NoFound />} />
-            </Routes>
-          </Container >
-        </BrowserRouter>
-      </div>
-        <footer className="footer">
+          <Menu />
+          <Box sx={{ flex: 1 }}>
+            <Container maxWidth='xl'>
+              <Routes>
+                <Route path="/" exact element={<Home />} />
+                <Route path="/experiments" exact element={<Experiments />} />
+                <Route path="/game" exact element={<Game />} />
+                <Route path="/check" exact element={<CheckPages />} />
+                <Route path="/chat" exact element={<Chat />} />
+                <Route path="/private" exact element={<Intranet />} />
+                <Route path='*' element={<NoFound />} />
+              </Routes>
+            </Container>
+          </Box>
           <Footer />
-        </footer>
-    </div>);
+        </BrowserRouter>
+      </Box>
+    </ThemeProvider>
+  );
 }
 
 class NoFound extends React.Component {
@@ -124,7 +128,7 @@ class DetailStatus extends React.Component {
   render() {
     const { detail } = this.props
     const type = detail.status === 2 ? "success" : "error"
-    const msg = detail.status === 2 ? "UP" : "DOWN"
+    const msg = detail.status === 2 ? "EN LÍNEA" : "FUERA DE LÍNEA"
 
     return (
       <div className='App_Card' align='center' >
