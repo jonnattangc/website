@@ -20,5 +20,6 @@ services:
       - "8080:80"
     networks:
       - db-net
+     # command: tail -f /home/logia/requirements.txt
 networks:
   db-net:
