@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Grid, Alert, Button, Paper, Stack, Snackbar, IconButton } from '@mui/material';
 import { Dashboard } from './Dashboard'
 import {Crud, MyTable } from './Crud'
+import { MyMap } from './MyMap'
+import { MyWebcam } from './MyWebcam'
 import env from 'react-dotenv';
 
 // import { GoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -10,12 +12,27 @@ class Experiments extends React.Component {
     render() {
         return (
             <Stack spacing={1}>
+                <ThreeRow />
+                <ZeroRow /> 
                 <FirsRow /> 
                 <TwoRow />
             </Stack>
         )
     }
 }
+
+class ZeroRow extends React.Component {
+    render() {
+        return (
+            <Grid container spacing={1}>
+                <Grid item xs={12}>
+                <Paper elevation={4}> <MyMap/> </Paper>
+                </Grid>
+            </Grid>
+        );
+    }
+}
+
 
 class FirsRow extends React.Component {
     render() {
@@ -47,6 +64,18 @@ class TwoRow extends React.Component {
     }
 }
 
+
+class ThreeRow extends React.Component {
+    render() {
+        return (
+            <Grid container spacing={1}>
+                <Grid item xs={12}>
+                <Paper elevation={4}> <MyWebcam/> </Paper>
+                </Grid>
+            </Grid>
+        );
+    }
+}
 class MyImagenToS3 extends React.Component {
 
     constructor(props) {
@@ -149,7 +178,7 @@ function BtnsTest() {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': window.location.origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 }

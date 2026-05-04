@@ -1,4 +1,4 @@
-FROM node:20-alpine3.17 as build-deps
+FROM node:22-alpine3.21 as build-deps
 
 ARG HCAPTCHA_SECRET
 ARG HCAPTCHA_SITE_KEY

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper, Grid } from '@mui/material';
+import { Paper, Grid, CircularProgress } from '@mui/material';
 import { CardMemorize } from './CardMemorize'
 import env from 'react-dotenv';
 
@@ -13,19 +13,20 @@ class Memorize extends React.Component {
 
     getCurrentData = async () => {
         try {
+            const origin = window.location.origin.replace('https://', '');
             var request = await fetch(
                 env.API_BASE_URL + '/page/memorize/states', {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 }
             });
             var response = await request.json();
             if (request.status === 200) {
-                console.log('GET Response: ', response);
+                console.log('GET Response States: ', response);
                 var card_state = [];
                 response.data.forEach(state => {
                     card_state.push({
@@ -60,11 +61,17 @@ class Memorize extends React.Component {
         }
 
         return (
-            <Grid container spacing={2}>
+            <div align="center">
                 {
-                    listItems
+                    listItems ? 
+                    <Grid container spacing={2}>
+                    { 
+                      listItems
+                    } 
+                    </Grid>
+                    : <CircularProgress color="success" size={50}/>
                 }
-            </Grid>
+            </div>
         );
     }
 }

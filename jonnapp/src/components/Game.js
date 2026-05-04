@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Stack } from '@mui/material';
+import { Button, Stack, Paper } from '@mui/material';
 import { Memorize } from './Memorize';
 import env from 'react-dotenv';
 
@@ -8,8 +8,8 @@ class Game extends React.Component {
         return (
             <div className='App_Main' align='center' >
                 <Stack spacing={3}>
-                    <Jugadores />
-                    <Memorize />
+                    <Paper elevation={1}>  <Jugadores /> </Paper>
+                    <Paper elevation={1}> <Memorize /> </Paper>
                 </Stack>
             </div>
         )
@@ -25,7 +25,7 @@ class Jugadores extends React.Component {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+                    'Access-Control-Allow-Origin': window.location.origin,
                     'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
                     'x-api-key': env.PAGE_API_KEY
                 }

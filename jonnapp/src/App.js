@@ -1,34 +1,43 @@
 import './App.css'
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Container, Alert, AlertTitle, Grid, CircularProgress } from '@mui/material'
-import { Curriculum } from './components/Curriculum'
+import { Container, Alert, AlertTitle, Grid, CircularProgress, Box } from '@mui/material'
+import { ThemeProvider, CssBaseline } from '@mui/material'
+import { Home } from './components/Home'
 import { Experiments } from './components/Experiments'
 import { Game } from './components/Game'
 import { Menu } from './components/Menu'
 import { Intranet } from './components/Intranet'
-import { MyMap } from './components/MyMap'
-import { MyWebcam } from './components/MyWebcam'
+import { Chat } from './components/Chat'
 import env from "react-dotenv"
 import img from './images/no_found.png'
+import { Footer } from './components/Footer'
+import theme from './theme'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Container maxWidth='xl'>
-        <Menu />
-        <Routes>
-          <Route path="/" exact element={<Curriculum />} />
-          <Route path="/experiments" exact element={<Experiments/>} />
-          <Route path="/game" exact element={<Game/>} />
-          <Route path="/check" exact element={<CheckPages/>} />
-          <Route path="/maps" exact element={ <MyMap/>} />
-          <Route path="/private"  exact element={<Intranet/>} />
-          <Route path="/webcam"  exact element={<MyWebcam/>} />
-          <Route path='*' element={<NoFound />} />
-        </Routes>
-      </Container >
-    </BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <BrowserRouter>
+          <Menu />
+          <Box sx={{ flex: 1 }}>
+            <Container maxWidth='xl'>
+              <Routes>
+                <Route path="/" exact element={<Home />} />
+                <Route path="/experiments" exact element={<Experiments />} />
+                <Route path="/game" exact element={<Game />} />
+                <Route path="/check" exact element={<CheckPages />} />
+                <Route path="/chat" exact element={<Chat />} />
+                <Route path="/private" exact element={<Intranet />} />
+                <Route path='*' element={<NoFound />} />
+              </Routes>
+            </Container>
+          </Box>
+          <Footer />
+        </BrowserRouter>
+      </Box>
+    </ThemeProvider>
   );
 }
 
@@ -41,41 +50,42 @@ class NoFound extends React.Component {
 }
 
 class CheckPages extends React.Component {
-  
+
   constructor(props) {
     super(props);
     this.state = {
-        loading: true,
-        msg: null,
-        monitors: []
+      loading: true,
+      msg: null,
+      monitors: []
     };
     this.statusRequest()
   }
-  
+
   statusRequest = async () => {
     try {
       this.setState({ loading: true });
-
+      console.log('Iniciando petición de estado de páginas...');
+      const origin = window.location.origin.replace('https://', '');
       var request = await fetch(
-          env.API_BASE_URL + '/page/status', {
-          method: 'GET',
-          mode: 'cors',
-          headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': 'dev.jonnattan.com',
-              'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-              'x-api-key': env.PAGE_API_KEY
-          },
+        env.API_BASE_URL + '/page/status', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': origin,
+          'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+          'x-api-key': env.PAGE_API_KEY
+        },
       });
       var response = await request.json();
       console.log('GET: ', response);
       if (request.status === 200) {
-        if( response.data.stat === 'ok' )
+        if (response.data.stat === 'ok')
           this.setState({ loading: false, msg: null, monitors: response.data.monitors });
       }
       else {
-          console.log('Código Error: ' + response.data.stat );
-          this.setState({ loading: false, msg: "error", monitors: [] });
+        console.log('Código Error: ' + response.data.stat);
+        this.setState({ loading: false, msg: "error", monitors: [] });
       }
     }
     catch (error) {
@@ -95,19 +105,20 @@ class CheckPages extends React.Component {
     else {
       if (monitors != null) {
         listItems = monitors.map((monitor) =>
-            <Grid item xs={6}>
-                <DetailStatus detail={monitor}/> 
-            </Grid>
+          <Grid item xs={6} key={monitor.id}>
+            <DetailStatus detail={monitor} />
+          </Grid>
         )
       }
       return (
-          <div className='App_Main' align='center' >
-              <Grid container spacing={2}>
-                {
-                  listItems
-                } 
-              </Grid>
-          </div>
+        <div className='App_Main' align='center' >
+          <Grid container spacing={2}>
+            {
+              listItems
+            }
+          </Grid>
+          <p>&nbsp; </p>
+        </div>
       );
     }
   }
@@ -117,13 +128,13 @@ class DetailStatus extends React.Component {
   render() {
     const { detail } = this.props
     const type = detail.status === 2 ? "success" : "error"
-    const msg = detail.status === 2 ? "UP" : "DOWN"
+    const msg = detail.status === 2 ? "EN LÍNEA" : "FUERA DE LÍNEA"
 
     return (
       <div className='App_Card' align='center' >
         <Alert severity={type} >
-            <AlertTitle>{msg}</AlertTitle>
-                El sitio {detail.friendly_name} <strong> {detail.url} </strong>
+          <AlertTitle>{msg}</AlertTitle>
+          El sitio {detail.friendly_name} <strong> {detail.url} </strong>
         </Alert>
       </div>);
   }

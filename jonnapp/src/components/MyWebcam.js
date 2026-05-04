@@ -43,13 +43,15 @@ class MyWebcam extends React.Component {
          'data': this.state.dataBase64,
          'name': this.state.nameFile
       }
+      const origin = window.location.origin.replace('https://', '');
       var request = await fetch(
         env.API_BASE_URL +'/page/aws/file/upload', {
         method: 'POST',
         mode: 'cors',
         headers: {
-          'Access-Control-Allow-Origin': 'dev.jonnattan.com',
+          'Access-Control-Allow-Origin': origin,
           'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
+          'x-api-key': env.PAGE_API_KEY,
           'Content-Type': 'application/json;charset=UTF-8',
           'Accept': 'application/json',
         },
@@ -58,7 +60,8 @@ class MyWebcam extends React.Component {
 
       if (request.status === 200) {
         let response = await request.json();
-        this.setState({ loading: false, msg: response.msg, urlImage: response.url })
+        console.log('[200]: ' + response.data.code + ' ' + response.data.url);
+        this.setState({ loading: false, msg: response.message, urlImage: response.data.url })
       }
       else {
         console.log('[409]: ' + request.error);
