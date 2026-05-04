@@ -1,8 +1,17 @@
 version: '3.9'
 services:
   website:
-    build: .
-    image: website:prd
+    image: website:1.0.0
+    build:
+      context: .
+      args:
+        API_BASE_URL: ${API_BASE_URL}
+        HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
+        AUTH_JONNA_SERVER: ${AUTH_JONNA_SERVER}
+        PAGE_API_KEY: ${PAGE_API_KEY}
+        GEO_API_KEY: ${GEO_API_KEY}
+        LOGIA_API_KEY: ${LOGIA_API_KEY}
+        UCC_API_KEY: ${UCC_API_KEY}
     container_name: website-jonnattan
     restart: always
     env_file:
@@ -11,5 +20,6 @@ services:
       - "8080:80"
     networks:
       - db-net
+     # command: tail -f /home/logia/requirements.txt
 networks:
   db-net:
