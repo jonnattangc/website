@@ -1,18 +1,19 @@
-import './App.css'
-import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Container, Alert, AlertTitle, Grid, CircularProgress, Box } from '@mui/material'
-import { ThemeProvider, CssBaseline } from '@mui/material'
-import { Home } from './components/Home'
-import { Experiments } from './components/Experiments'
-import { Game } from './components/Game'
-import { Menu } from './components/Menu'
-import { Intranet } from './components/Intranet'
-import { Chat } from './components/Chat'
-import env from "react-dotenv"
-import img from './images/no_found.png'
-import { Footer } from './components/Footer'
-import theme from './theme'
+import './App.css';
+import React, { Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Container, Alert, AlertTitle, Grid, CircularProgress, Box } from '@mui/material';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { Home } from './components/Home';
+import { Menu } from './components/Menu';
+import { Footer } from './components/Footer';
+import { NoFound } from './components/NoFound';
+import theme from './theme';
+import { apiClient, authHeaders } from './services/api';
+
+const Experiments = React.lazy(() => import('./components/Experiments').then(m => ({ default: m.Experiments })));
+const Game = React.lazy(() => import('./components/Game').then(m => ({ default: m.Game })));
+const Chat = React.lazy(() => import('./components/Chat').then(m => ({ default: m.Chat })));
+const Intranet = React.lazy(() => import('./components/Intranet').then(m => ({ default: m.Intranet })));
 
 function App() {
   return (
@@ -22,16 +23,18 @@ function App() {
         <BrowserRouter>
           <Menu />
           <Box sx={{ flex: 1 }}>
-            <Container maxWidth='xl'>
-              <Routes>
-                <Route path="/" exact element={<Home />} />
-                <Route path="/experiments" exact element={<Experiments />} />
-                <Route path="/game" exact element={<Game />} />
-                <Route path="/check" exact element={<CheckPages />} />
-                <Route path="/chat" exact element={<Chat />} />
-                <Route path="/private" exact element={<Intranet />} />
-                <Route path='*' element={<NoFound />} />
-              </Routes>
+            <Container maxWidth="xl">
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/experiments" element={<Experiments />} />
+                  <Route path="/game" element={<Game />} />
+                  <Route path="/check" element={<CheckPages />} />
+                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/private" element={<Intranet />} />
+                  <Route path="*" element={<NoFound />} />
+                </Routes>
+              </Suspense>
             </Container>
           </Box>
           <Footer />
@@ -41,103 +44,94 @@ function App() {
   );
 }
 
-class NoFound extends React.Component {
-  render() {
-    return (<div className='App_Main' align='center'>
-      <img alt="Imagen de pagina no encontrada" src={img} />
-    </div>);
-  }
+function LoadingFallback() {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
+  );
 }
 
-class CheckPages extends React.Component {
+function CheckPages() {
+  const [loading, setLoading] = React.useState(true);
+  const [msg, setMsg] = React.useState(null);
+  const [monitors, setMonitors] = React.useState([]);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: true,
-      msg: null,
-      monitors: []
-    };
-    this.statusRequest()
-  }
-
-  statusRequest = async () => {
-    try {
-      this.setState({ loading: true });
-      console.log('Iniciando petición de estado de páginas...');
-      const origin = window.location.origin.replace('https://', '');
-      var request = await fetch(
-        env.API_BASE_URL + '/page/status', {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': origin,
-          'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-          'x-api-key': env.PAGE_API_KEY
-        },
-      });
-      var response = await request.json();
-      console.log('GET: ', response);
-      if (request.status === 200) {
-        if (response.data.stat === 'ok')
-          this.setState({ loading: false, msg: null, monitors: response.data.monitors });
-      }
-      else {
-        console.log('Código Error: ' + response.data.stat);
-        this.setState({ loading: false, msg: "error", monitors: [] });
+  React.useEffect(() => {
+    let cancelled = false;
+    async function statusRequest() {
+      try {
+        setLoading(true);
+        const response = await apiClient('/page/status', {
+          method: 'GET',
+          headers: authHeaders(),
+        });
+        if (!cancelled) {
+          if (response.data?.stat === 'ok') {
+            setLoading(false);
+            setMsg(null);
+            setMonitors(response.data.monitors || []);
+          } else {
+            setLoading(false);
+            setMsg('Error al obtener estado');
+            setMonitors([]);
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoading(false);
+          setMsg(error.message || 'Error');
+          setMonitors([]);
+        }
+        console.error('Status request error:', error);
       }
     }
-    catch (error) {
-      this.setState({ loading: false, msg: error, monitors: [] });
-      throw Error(error);
-    }
+    statusRequest();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="App_Main" style={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </div>
+    );
   }
 
-  render() {
-    const { monitors, loading, msg } = this.state;
-    let listItems = null
+  if (msg) {
+    return (
+      <div className="App_Main" style={{ textAlign: 'center' }}>
+        <Alert severity="error">{msg}</Alert>
+      </div>
+    );
+  }
 
-    if (loading)
-      return (<div className='App_Main' align='center' > <CircularProgress /> </div>);
-    else if (msg != null)
-      return (<div className='App_Main' align='center'> <Alert severity="error">{msg}</Alert> </div>);
-    else {
-      if (monitors != null) {
-        listItems = monitors.map((monitor) =>
+  return (
+    <div className="App_Main" style={{ textAlign: 'center' }}>
+      <Grid container spacing={2}>
+        {monitors.map((monitor) => (
           <Grid item xs={6} key={monitor.id}>
             <DetailStatus detail={monitor} />
           </Grid>
-        )
-      }
-      return (
-        <div className='App_Main' align='center' >
-          <Grid container spacing={2}>
-            {
-              listItems
-            }
-          </Grid>
-          <p>&nbsp; </p>
-        </div>
-      );
-    }
-  }
+        ))}
+      </Grid>
+      <p>&nbsp;</p>
+    </div>
+  );
 }
 
-class DetailStatus extends React.Component {
-  render() {
-    const { detail } = this.props
-    const type = detail.status === 2 ? "success" : "error"
-    const msg = detail.status === 2 ? "EN LÍNEA" : "FUERA DE LÍNEA"
+function DetailStatus({ detail }) {
+  const type = detail.status === 2 ? 'success' : 'error';
+  const msg = detail.status === 2 ? 'EN LÍNEA' : 'FUERA DE LÍNEA';
 
-    return (
-      <div className='App_Card' align='center' >
-        <Alert severity={type} >
-          <AlertTitle>{msg}</AlertTitle>
-          El sitio {detail.friendly_name} <strong> {detail.url} </strong>
-        </Alert>
-      </div>);
-  }
+  return (
+    <div className="App_Card" style={{ textAlign: 'center' }}>
+      <Alert severity={type}>
+        <AlertTitle>{msg}</AlertTitle>
+        El sitio {detail.friendly_name} <strong>{detail.url}</strong>
+      </Alert>
+    </div>
+  );
 }
 
 export default App;

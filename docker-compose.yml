@@ -1,7 +1,16 @@
 version: '3.9'
 services:
   website:
-    build: .
+    build:
+      context: .
+      args:
+        API_BASE_URL: ${API_BASE_URL}
+        HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
+        AUTH_JONNA_SERVER: ${AUTH_JONNA_SERVER}
+        PAGE_API_KEY: ${PAGE_API_KEY}
+        GEO_API_KEY: ${GEO_API_KEY}
+        LOGIA_API_KEY: ${LOGIA_API_KEY}
+        UCC_API_KEY: ${UCC_API_KEY}
     image: website:prd
     container_name: website-jonnattan
     restart: always

@@ -1,360 +1,307 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Alert, Select, MenuItem, CircularProgress, TextField, FormControl, Button, Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import env from 'react-dotenv';
+import { apiClient, authHeaders } from '../services/api';
+import { env } from '../config/clientEnv';
 
-class Crud extends React.Component {
+function Crud() {
+  const [error, setError] = useState(false);
+  const [message, setMessage] = useState('');
+  const [genOtp, setGenOtp] = useState(false);
+  const [validOtp, setValidOtp] = useState(false);
+  const [captcha, setCaptcha] = useState(false);
+  const [mobile, setMobile] = useState('');
+  const [len, setLen] = useState('');
+  const [otp, setOtp] = useState('');
+  const [ref, setRef] = useState('');
+  const [duration, setDuration] = useState(0);
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            error: false,
-            message: '',
-            genOtp: false,
-            validOtp: false,
-            captcha: false,
-            mobile: '', 
-            len: null , 
-            otp: null , 
-            ref: ''
-        };
+  const handleVerificationSuccess = async (token, ekey) => {
+    try {
+      await validateCaptcha(token, ekey);
+    } catch (error) {
+      console.error('Captcha verification failed:', error);
     }
+  };
 
-    
-    handleVerificationSuccess = async (token, ekey) => {
-        try {
-            await this.validateCapcha(token, ekey)
-        }
-        catch (error) {
-            throw Error(error);
-        }
+  const validateCaptcha = async (token, ekey) => {
+    try {
+      console.log('HCaptcha token: ', token);
+      console.log('HCaptcha ekey: ', ekey);
+      const dataCaptcha = { token, sitekey: env.HCAPTCHA_SITE_KEY };
+      const response = await apiClient('/page/hcaptcha', {
+        method: 'POST',
+        body: JSON.stringify({ data: dataCaptcha }),
+        headers: authHeaders(),
+      });
+      if (response.data) {
+        setCaptcha(response.data.success);
+      } else {
+        setCaptcha(false);
+      }
+    } catch (error) {
+      console.error('Captcha validation error:', error);
+      setCaptcha(false);
     }
-    
-    async validateCapcha( token, ekey ) {
-        try {
-            console.log('HCaptcha token: ', token);
-            console.log('HCaptcha ekey: ', ekey);
-            
-            let data_captcha = {
-                token: token,
-                secret: env.HCAPTCHA_SECRET,
-                sitekey : env.HCAPTCHA_SITE_KEY
-            }
-            const origin = window.location.origin.replace('https://', '');
-            var request = await fetch(
-                env.API_BASE_URL + '/page/hcaptcha', {
-                method: 'POST', 
-                mode: 'cors',
-                body: JSON.stringify({'data': data_captcha}),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': origin,
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                    'x-api-key': env.PAGE_API_KEY
-                },
-            });
-            var response = await request.json();
+  };
 
-            if (request.status === 200 ) {
-                console.log('POST : ', response);
-                this.setState({ captcha: response.data.success });
-            }
-            else {
-                console.log('[405]: ' + request.error);
-                this.setState({ captcha: false });
-            }
-        }
-        catch (error) {
-            //this.setState({ loading: false, errorMsg: error });
-            throw Error(error);
-        }
+  const generateOtp = async () => {
+    try {
+      console.log('Mobile: [' + mobile + '] Len: ' + len);
+      setGenOtp(true);
+      setValidOtp(false);
+      setError(false);
+
+      let mobilePhone = mobile != null ? mobile.replace(/\s/g, '') : '';
+      if (mobilePhone.length === 8) mobilePhone = '569' + mobilePhone;
+      if (mobilePhone.length === 9) mobilePhone = '56' + mobilePhone;
+      if (mobilePhone.startsWith('+56')) mobilePhone = mobilePhone.replace('+56', '56');
+
+      console.log('Formatter number ' + mobilePhone);
+      if (mobilePhone.length < 10) {
+        setGenOtp(false);
+        setValidOtp(false);
+        setError(true);
+        setCaptcha(false);
+        setMessage('Error de numero mobile');
+        return;
+      }
+
+      const data = {
+        number_mobile: mobilePhone,
+        duration_min: 5,
+        length_otp: len,
+      };
+
+      const response = await apiClient('/page/waza/generate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: authHeaders(),
+      });
+
+      if (response.data) {
+        const text = 'Referencia: ' + response.ref;
+        setGenOtp(false);
+        setError(false);
+        setMessage(text);
+        setCaptcha(true);
+      } else {
+        setGenOtp(false);
+        setValidOtp(false);
+        setError(true);
+        setCaptcha(false);
+        setMessage(response.statusDescription || 'Error');
+      }
+    } catch (error) {
+      setGenOtp(false);
+      setValidOtp(false);
+      setError(true);
+      setMessage(error.message || 'Error');
+      setCaptcha(false);
+      console.error('Generate OTP error:', error);
     }
+  };
 
-     /**
-        * Obtiene las comunas de una regi'on
-        * @param {*} region
-        */
-    generateOtp = async () => {
-        try {
-            const { mobile, len } = this.state;
-            console.log('Mobile: [' + mobile + '] Len: ' + len );
-            this.setState({ genOtp: true, validOtp: false, error: false });
+  const validateOtp = async () => {
+    try {
+      console.log('Otp: ' + otp + ' Ref: ' + ref);
+      setGenOtp(false);
+      setValidOtp(true);
+      setError(false);
+      setMessage('');
 
-            let mobile_phone = mobile != null ? mobile.replace(' ','') : ''
-            
-            if( mobile_phone.length === 8 )
-                mobile_phone = '569' + mobile_phone 
-            if( mobile_phone.length === 9 )
-                mobile_phone = '56' + mobile_phone 
-            if( mobile_phone.startsWith('+56') )
-                mobile_phone = mobile_phone.replace('+56','56') 
+      const data = { reference: ref, otp: otp };
+      const response = await apiClient('/page/waza/validate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: authHeaders(),
+      });
 
-            console.log('Forrmatter number ' + mobile_phone );
-            if ( mobile_phone.length < 10 )
-              this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: 'Error de numero mobile' });
-
-            let data = {
-                number_mobile: mobile_phone,
-                duration_min: 5,
-                length_otp : len
-            }
-            const origin = window.location.origin.replace('https://', '');
-            var request = await fetch(
-                env.API_BASE_URL + '/page/waza/generate', {
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': origin,
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                    'x-api-key': env.PAGE_API_KEY
-                },
-            });
-            var response = await request.json();
-            console.log('POST: ', response);
-            if (request.status === 200) {
-                let text = 'Referencia: ' + response.ref
-                this.setState({ genOtp: false, error: false, message: text, captcha: true });
-            }
-            else {
-                console.log('Código Error: ' + response.statusCode);
-                this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: response.statusDescription });
-            }
-        }
-        catch (error) {
-            this.setState({genOtp: false, validOtp: false, error: true, message: error, captcha: false });
-            throw Error(error);
-        }
+      if (response.success) {
+        setGenOtp(false);
+        setValidOtp(false);
+        setError(false);
+        setMessage(response.statusDescription);
+        setCaptcha(true);
+      } else {
+        setGenOtp(false);
+        setValidOtp(false);
+        setError(true);
+        setCaptcha(true);
+        setMessage(response.statusDescription || 'Error');
+      }
+    } catch (error) {
+      setGenOtp(false);
+      setValidOtp(false);
+      setError(true);
+      setMessage(error.message || 'Error');
+      setCaptcha(false);
+      console.error('Validate OTP error:', error);
     }
+  };
 
-     /**
-        * Valida la otp
-        */
-    validateOtp = async () => {
-        const { otp, ref } = this.state;
-        console.log('Otp: ' + otp + ' Ref: ' + ref );
-        try {
-            this.setState({ genOtp: false, validOtp: true, error: false, message:'' });
-            let data = {
-                reference: ref,
-                otp: otp
-            }
-            const origin = window.location.origin.replace('https://', '');
-            var request = await fetch(
-                env.API_BASE_URL + '/page/waza/validate', {
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': origin,
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                    'x-api-key': env.PAGE_API_KEY
-                },
-            });
-            var response = await request.json();
+  const msgType = error ? 'error' : 'success';
+  const showAlert = message !== '';
 
-            if (request.status === 200 ) {
-                if ( response.success )
-                  this.setState({ genOtp: false, validOtp: false, error: false, message: response.statusDescription, captcha: true }); 
-                else 
-                  this.setState({ genOtp: false, validOtp: false, error: true, captcha: true, message: response.statusDescription });
-            }
-            else {
-                console.log('Código Error: ' + response.statusCode);
-                this.setState({ genOtp: false, validOtp: false, error: true, captcha: false, message: response.statusDescription });
-            }
-        }
-        catch (error) {
-            this.setState({genOtp: false, validOtp: false, error: true, message: error, captcha: false });
-            throw Error(error);
-        }
-    }
-
-    render() {
-        const { error, captcha, genOtp, validOtp, message } = this.state;
-        const msgType = error ? "error" : "success"
-        const showAlert = message !== ''
-        return (
-            <div className='App_Main'>
-                    <div>
-                        <TextField id="mobile" label="Teléfono móvil" helperText="Teléfono del destinatario de la Otp"
-                           error={error} size="small" value={this.state.mobile} onChange={(e) => this.setState({ mobile: e.target.value })} />
-                        <TextField id="len"  label="Largo de la Otp" helperText="Cantidad de números de la Otp" 
-                           error={error} size="small" value={this.state.len} onChange={(e) => this.setState({ len: e.target.value })} />
-                        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}> 
-                            <Select labelId="minutos" id="type" value="0" label="Duración en minutos">
-                                <MenuItem value={0} selected>5 min.</MenuItem>
-                                <MenuItem value={1}>10 min.</MenuItem>
-                                <MenuItem value={2}>15 min.</MenuItem> 
-                                <MenuItem value={3}>20 min.</MenuItem> 
-                                <MenuItem value={4}>30 min.</MenuItem> 
-                            </Select>
-                        </FormControl>
-                    </div>
-                    <div style={{ padding: "10px", border: "none" }}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={10}>
-                                <div align="right" style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
-                                    <Button type="submit" variant="contained" color="success" disabled={!captcha} onClick={this.generateOtp}>Solicitar OTP</Button>
-                                </div>
-                            </Grid>
-                            <Grid item xs={2}>
-                            {
-                                genOtp ? 
-                                    <div align="left">
-                                        <CircularProgress color="success" size="20px"/>
-                                    </div>
-                                : null
-                            }     
-                            </Grid>
-                        </Grid>
-                    </div>
-
-                    <div>
-                        <TextField id="otp" label="One-Time Password" helperText="Otp Recibida" 
-                        error={error} size="small" value={this.state.otp} onChange={(e) => this.setState({ otp: e.target.value })}  />
-                        <TextField id="ref"  label="Referencia al pedir otp" helperText="Referencia recibida"
-                         error={error} size="small" value={this.state.ref} onChange={(e) => this.setState({ ref: e.target.value })} />
-                    </div>
-                    <div style={{ padding: "10px", border: "none" }}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={10}>
-                                <div style={{ display: "contents", padding: "10px 10px 10px 10px", border: "none" }}>
-                                    <Button type="submit" variant="contained" color="primary" disabled={!captcha} onClick={this.validateOtp} >Validar OTP</Button>
-                                </div>
-                            </Grid>
-                            <Grid item xs={2}>
-                            {
-                                validOtp ? 
-                                    <div align="left">
-                                        <CircularProgress color="primary" size="20px" />
-                                    </div>
-                                : null
-                            }     
-                            </Grid>
-                        </Grid>
-                    </div>
-
-                <div>
-                  <HCaptcha sitekey={env.HCAPTCHA_SITE_KEY} onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} />
-                </div>
-                <div>
-                  {
-                    showAlert ?
-                    <Alert severity={msgType}> {message} </Alert>
-                    : null
-                  }
-                </div>
+  return (
+    <div className="App_Main">
+      <div>
+        <TextField
+          id="mobile"
+          label="Teléfono móvil"
+          helperText="Teléfono del destinatario de la Otp"
+          error={error}
+          size="small"
+          value={mobile}
+          onChange={(e) => setMobile(e.target.value)}
+        />
+        <TextField
+          id="len"
+          label="Largo de la Otp"
+          helperText="Cantidad de números de la Otp"
+          error={error}
+          size="small"
+          value={len}
+          onChange={(e) => setLen(e.target.value)}
+        />
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+          <Select
+            labelId="minutos"
+            id="type"
+            value={duration}
+            label="Duración en minutos"
+            onChange={(e) => setDuration(e.target.value)}
+          >
+            <MenuItem value={0}>5 min.</MenuItem>
+            <MenuItem value={1}>10 min.</MenuItem>
+            <MenuItem value={2}>15 min.</MenuItem>
+            <MenuItem value={3}>20 min.</MenuItem>
+            <MenuItem value={4}>30 min.</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+      <div style={{ padding: '10px', border: 'none' }}>
+        <Grid container spacing={2}>
+          <Grid item xs={10}>
+            <div style={{ display: 'contents', padding: '10px' }}>
+              <Button type="button" variant="contained" color="success" disabled={!captcha} onClick={generateOtp}>
+                Solicitar OTP
+              </Button>
             </div>
+          </Grid>
+          <Grid item xs={2}>
+            {genOtp && (
+              <div style={{ textAlign: 'left' }}>
+                <CircularProgress color="success" size="20px" />
+              </div>
+            )}
+          </Grid>
+        </Grid>
+      </div>
 
-        );
-    }
+      <div>
+        <TextField
+          id="otp"
+          label="One-Time Password"
+          helperText="Otp Recibida"
+          error={error}
+          size="small"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+        />
+        <TextField
+          id="ref"
+          label="Referencia al pedir otp"
+          helperText="Referencia recibida"
+          error={error}
+          size="small"
+          value={ref}
+          onChange={(e) => setRef(e.target.value)}
+        />
+      </div>
+      <div style={{ padding: '10px', border: 'none' }}>
+        <Grid container spacing={2}>
+          <Grid item xs={10}>
+            <div style={{ display: 'contents', padding: '10px' }}>
+              <Button type="button" variant="contained" color="primary" disabled={!captcha} onClick={validateOtp}>
+                Validar OTP
+              </Button>
+            </div>
+          </Grid>
+          <Grid item xs={2}>
+            {validOtp && (
+              <div style={{ textAlign: 'left' }}>
+                <CircularProgress color="primary" size="20px" />
+              </div>
+            )}
+          </Grid>
+        </Grid>
+      </div>
+
+      <div>
+        <HCaptcha sitekey={env.HCAPTCHA_SITE_KEY} onVerify={(token, ekey) => handleVerificationSuccess(token, ekey)} />
+      </div>
+      <div>
+        {showAlert && <Alert severity={msgType}>{message}</Alert>}
+      </div>
+    </div>
+  );
 }
 
-class MyTable extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            rows: []
-        };
-        //this.getData();
-    }
+function MyTable() {
+  const [rows, setRows] = useState([]);
 
-    getData = async () => {
-        let url = env.API_BASE_URL + '/emulator/page/users'
-
-        try {
-            var request = await fetch(
-                url, {
-                method: 'GET',
-            });
-            var response = await request.json();
-            console.log('TABLA: ', response);
-            if (request.status === 200) {
-                var data = []
-                response.users.forEach(user => {
-                    var usuario = {
-                        id: user.id, name: user.name, mail: user.mail, rut: user.rut, city: user.city, age: user.age, mobile: user.mobile, address: user.address
-                    }
-                    data.push(usuario);
-                });
-                this.setState({ rows: data })
-            }
-            else {
-                console.log('[409]: ' + request.error);
-            }
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await apiClient('/emulator/page/users', { method: 'GET' });
+        if (response.users) {
+          const data = response.users.map(user => ({
+            id: user.id,
+            name: user.name,
+            mail: user.mail,
+            rut: user.rut,
+            city: user.city,
+            age: user.age,
+            mobile: user.mobile,
+            address: user.address,
+          }));
+          setRows(data);
         }
-        catch (error) {
-            throw Error(error);
-        }
+      } catch (error) {
+        console.error('Error loading table:', error);
+      }
     }
+    fetchData();
+  }, []);
 
-    columns = [
-        { field: 'id', headerName: 'ID', width: 30 },
-        {
-            field: 'name',
-            headerName: 'Nombre',
-            width: 100,
-            editable: true,
-        },
-        {
-            field: 'mail',
-            headerName: 'Correo',
-            width: 150,
-            editable: true,
-        },
-        {
-            field: 'rut',
-            headerName: 'RUT',
-            width: 110,
-            editable: true,
-        },
-        {
-            field: 'city',
-            headerName: 'Ciudad',
-            width: 110,
-            editable: true,
-        },
-        {
-            field: 'age',
-            headerName: 'Edad',
-            width: 110,
-            editable: true,
-        },
-        {
-            field: 'mobile',
-            headerName: 'Celular',
-            width: 110,
-            editable: true,
-        },
-        {
-            field: 'address',
-            headerName: 'Dirección',
-            description: 'Direccion Usuario',
-            sortable: false,
-            width: 160,
-            valueGetter: (params) =>
-                `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-        },
-    ]
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 30 },
+    { field: 'name', headerName: 'Nombre', width: 100, editable: true },
+    { field: 'mail', headerName: 'Correo', width: 150, editable: true },
+    { field: 'rut', headerName: 'RUT', width: 110, editable: true },
+    { field: 'city', headerName: 'Ciudad', width: 110, editable: true },
+    { field: 'age', headerName: 'Edad', width: 110, editable: true },
+    { field: 'mobile', headerName: 'Celular', width: 110, editable: true },
+    { field: 'address', headerName: 'Dirección', description: 'Direccion Usuario', sortable: false, width: 160, valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}` },
+  ];
 
-    render() {
-        const { rows } = this.state;
-        return (
-            <div className='App_Main' >
-                <Box sx={{ height: 400, width: '100%' }}>
-                    <DataGrid rows={rows} columns={this.columns} pageSize={5} rowsPerPageOptions={[5]} checkboxSelection={false} disableSelectionOnClick experimentalFeatures={{ newEditingApi: true }} />
-                </Box>
-            </div>
-        );
-    }
-
+  return (
+    <div className="App_Main">
+      <Box sx={{ height: 400, width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          checkboxSelection={false}
+          disableSelectionOnClick
+          experimentalFeatures={{ newEditingApi: true }}
+        />
+      </Box>
+    </div>
+  );
 }
 
 export { Crud, MyTable };

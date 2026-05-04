@@ -1,37 +1,41 @@
-FROM node:22-alpine3.21 as build-deps
+FROM node:24-alpine AS build-deps
 
-ARG HCAPTCHA_SECRET
+ARG API_BASE_URL
 ARG HCAPTCHA_SITE_KEY
 ARG AUTH_JONNA_SERVER
-ARG API_BASE_URL
+ARG PAGE_API_KEY
+ARG GEO_API_KEY
+ARG LOGIA_API_KEY
+ARG UCC_API_KEY
 
-ENV HCAPTCHA_SECRET=$HCAPTCHA_SECRET
-ENV HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY
-ENV AUTH_JONNA_SERVER=$AUTH_JONNA_SERVER
-ENV API_BASE_URL=$API_BASE_URL
+ENV VITE_API_BASE_URL=$API_BASE_URL
+ENV VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY
+ENV VITE_AUTH_JONNA_SERVER=$AUTH_JONNA_SERVER
+ENV VITE_PAGE_API_KEY=$PAGE_API_KEY
+ENV VITE_GEO_API_KEY=$GEO_API_KEY
+ENV VITE_LOGIA_API_KEY=$LOGIA_API_KEY
+ENV VITE_UCC_API_KEY=$UCC_API_KEY
 
-ENV NODE_ENV 'production'
+ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-COPY ./jonnapp ./jonnapp
+COPY ./jonnapp .
 
-RUN cd jonnapp/  && \
-    yarn install --ignore-scripts && \
-    yarn build
+RUN npm install
 
-FROM nginx:1.12-alpine
+ADD .env.example .env
 
-COPY --from=build-deps /usr/src/app/jonnapp/build /usr/share/nginx/html
+RUN npm run build
+
+FROM nginx:stable-alpine
+
+COPY --from=build-deps /usr/src/app/dist /usr/share/nginx/html
 
 ADD ./conf-nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
 
-#docker build -t website:v3.0 
-#   --build-arg HCAPTCHA_SECRET="" 
-#   --build-arg HCAPTCHA_SITE_KEY=" " 
-#   --build-arg AUTH_JONNA_SERVER=" " 
-#   --build-arg API_BASE_URL=" " .
+CMD ["nginx", "-g", "daemon off;"]

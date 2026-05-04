@@ -1,200 +1,172 @@
-import React from "react"
-import Webcam from "react-webcam"
-import { Grid, CircularProgress,  Alert, Button, Paper, Stack } from '@mui/material'
+import React, { useState } from 'react';
+import Webcam from 'react-webcam';
+import { Grid, CircularProgress, Alert, Button, Paper, Stack } from '@mui/material';
+import { apiClient, authHeaders } from '../services/api';
 
-import env from 'react-dotenv'
-//import HCaptcha from '@hcaptcha/react-hcaptcha'
+function MyWebcam() {
+  const [dataBase64, setDataBase64] = useState(null);
+  const [nameFile, setNameFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [urlImage, setUrlImage] = useState(null);
+  const [msg, setMsg] = useState(null);
 
-class MyWebcam extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      dataBase64: null,
-      nameFile: null,
-      loading: false,
-      urlImage: null,
-      msg: null
-    };
-  }
-
-  setImage = async (dataImage, dataBase64, nameFile) => {
-    
-    this.setState({ loading: true })
-    if (dataImage == null ) {
-      this.setState({ dataBase64: dataBase64, nameFile: nameFile })
-    }
-
-    if( dataBase64 == null ) {
+  const setImage = (dataImage, base64, name) => {
+    setLoading(true);
+    if (dataImage == null) {
+      setDataBase64(base64);
+      setNameFile(name);
+      setLoading(false);
+    } else {
       const reader = new FileReader();
-      reader.onload = async () => {
-        dataBase64 = reader.result
-        this.setState({ dataBase64: dataBase64, nameFile: nameFile })
-      }
-      await reader.readAsDataURL(dataImage)
+      reader.onload = () => {
+        setDataBase64(reader.result);
+        setNameFile(name);
+        setLoading(false);
+      };
+      reader.readAsDataURL(dataImage);
     }
-    this.setState({ loading: false })
-  }
+  };
 
-  uploadImage = async () => {
-    this.setState({ loading: true, msg: null })
+  const uploadImage = async () => {
+    setLoading(true);
+    setMsg(null);
     try {
-      let dataTx = {
-         'data': this.state.dataBase64,
-         'name': this.state.nameFile
-      }
-      const origin = window.location.origin.replace('https://', '');
-      var request = await fetch(
-        env.API_BASE_URL +'/page/aws/file/upload', {
+      const dataTx = {
+        data: dataBase64,
+        name: nameFile,
+      };
+      const response = await apiClient('/page/aws/file/upload', {
         method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-          'x-api-key': env.PAGE_API_KEY,
-          'Content-Type': 'application/json;charset=UTF-8',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(dataTx)
+        headers: authHeaders(),
+        body: JSON.stringify(dataTx),
       });
-
-      if (request.status === 200) {
-        let response = await request.json();
+      if (response.data) {
         console.log('[200]: ' + response.data.code + ' ' + response.data.url);
-        this.setState({ loading: false, msg: response.message, urlImage: response.data.url })
+        setLoading(false);
+        setMsg(response.message);
+        setUrlImage(response.data.url);
+      } else {
+        setLoading(false);
+        setMsg('Error en subida');
+        setUrlImage(null);
       }
-      else {
-        console.log('[409]: ' + request.error);
-        this.setState({ loading: false, msg: request.error, urlImage: null })
-      }
+    } catch (error) {
+      setLoading(false);
+      setMsg(error.message || 'Error');
+      setUrlImage(null);
+      console.error('Upload error:', error);
     }
-    catch (error) {
-      this.setState({ loading: false, msg: error, urlImage: null })
-      throw Error(error)
-    }
-  }
+  };
 
-  render() {
-    const { dataBase64, loading, msg, urlImage } = this.state 
-    const typeMsg = urlImage == null ? "danger" : "success"
-    const message = msg ? msg : 'La Url de la imagen es ' + urlImage
-    return (
-      <div style={{ padding: "30px 30px 30px 30px", border: "none" }} align="center" >
-        <Stack spacing={1}>
-          <Grid container columnSpacing={2} >
-            <Grid item xs={6}>
-              <WebcamImage setImage={this.setImage} />
-            </Grid>
-            <Grid item xs={6} >
-              <PhotoView image={dataBase64} uploadImage={ this.uploadImage } loading={loading} />
-            </Grid>
-            <Grid item xs={6} >
-              <FileUpload setImage={this.setImage} />
-            </Grid>
-            <Grid item xs={6} >
-            {
-              loading ?
-              <div align="left">
+  const typeMsg = urlImage == null ? 'error' : 'success';
+  const message = msg ? msg : 'La Url de la imagen es ' + urlImage;
+
+  return (
+    <div style={{ padding: '30px', textAlign: 'center', border: 'none' }}>
+      <Stack spacing={1}>
+        <Grid container columnSpacing={2}>
+          <Grid item xs={6}>
+            <WebcamImage setImage={setImage} />
+          </Grid>
+          <Grid item xs={6}>
+            <PhotoView image={dataBase64} uploadImage={uploadImage} loading={loading} />
+          </Grid>
+          <Grid item xs={6}>
+            <FileUpload setImage={setImage} />
+          </Grid>
+          <Grid item xs={6}>
+            {loading && (
+              <div style={{ textAlign: 'left' }}>
                 <CircularProgress color="success" size="50px" />
               </div>
-              : null
-            } 
-            {
-              msg ? <Alert severity={typeMsg}>{message}</Alert> : null
-            }
-            </Grid>
+            )}
+            {msg && <Alert severity={typeMsg}>{message}</Alert>}
           </Grid>
-        </Stack>
-      </div>
-    );
-  }
+        </Grid>
+      </Stack>
+    </div>
+  );
 }
 
-class WebcamImage extends React.Component {
-  render() {
-    const videoConstraints = { width: 390, height: 390, facingMode: "user", }
-    return (
-      <Paper elevation={4}>
-        {
-          <Stack spacing={2}>
-            <div style={{ padding: "15px 0px 0px 0px" }} align="center" >
-              <Webcam screenshotFormat="image/png" videoConstraints={videoConstraints}
-                audio={false} height={300} width={300} mirrored={true} >
-                {
-                  ({ getScreenshot }) => (
-                    <div style={{ padding: "0px 10px 10px 0px" }} align="center" >
-                      <Button type="submit" variant="contained" color="primary" onClick={() => {
-                        const data64 = getScreenshot({ width: 500, height: 600 })
-                        this.props.setImage(null, data64, 'pic.png')
-                      }} >Tomar Fotografía</Button>
-                    </div>
-                  )
-                }
-              </Webcam>
-            </div>
-          </Stack>
-        }
-      </Paper>
-    );
-  }
-}
+function WebcamImage({ setImage }) {
+  const videoConstraints = { width: 390, height: 390, facingMode: 'user' };
 
-class FileUpload extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = ({
-      file: null
-    })
-  }
-
-  handleFileChange = async ( e ) => {
-    if (e.target.files) 
-      this.setState({ file: e.target.files[0] })
-  }
-
-  handleFileView = async () => {
-    let file = this.state.file
-    this.props.setImage(file, null, file.name )
-  }
-
-  render() {
-    return (
-      <div style={{ padding: "20px 0px 0px 0px" }} align="center" >
-        <input type="file" onChange={this.handleFileChange} />
-        <Button type="submit" variant="contained" color="primary" onClick={this.handleFileView} >
-          Cargar Fotografia
-        </Button>
-      </div>
-    );
-  }
-}
-
-class PhotoView extends React.Component {
-  loadSolicitude = async () => {
-    this.props.uploadImage()
-  }
-
-  render() {
-    return (
-      <Paper elevation={2}>
-        <div style={{ padding: "15px 0px 0px 0px", border: "none", height:"365px", width:"300px" }} align="center" >
-          {
-            this.props.image != null ?
-              <div>
-                <img src={this.props.image} alt="screenshot" width="300px" height="300px" />
-              </div>
-              : null
-          }
-          <div style={{ padding: "0px 10px 10px 0px" }} align="center" >
-                <Button type="submit" variant="contained" disabled={this.props.image == null} color="primary" onClick={this.loadSolicitude} >
-                  Subir Fotografia
+  return (
+    <Paper elevation={4}>
+      <Stack spacing={2}>
+        <div style={{ padding: '15px 0px 0px 0px', textAlign: 'center' }}>
+          <Webcam
+            screenshotFormat="image/png"
+            videoConstraints={videoConstraints}
+            audio={false}
+            height={300}
+            width={300}
+            mirrored={true}
+          >
+            {({ getScreenshot }) => (
+              <div style={{ padding: '0px 10px 10px 0px', textAlign: 'center' }}>
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    const data64 = getScreenshot({ width: 500, height: 600 });
+                    setImage(null, data64, 'pic.png');
+                  }}
+                >
+                  Tomar Fotografía
                 </Button>
-            </div>
+              </div>
+            )}
+          </Webcam>
         </div>
-      </Paper>
-    );
-  }
+      </Stack>
+    </Paper>
+  );
+}
+
+function FileUpload({ setImage }) {
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleFileView = () => {
+    if (file) {
+      setImage(file, null, file.name);
+    }
+  };
+
+  return (
+    <div style={{ padding: '20px 0px 0px 0px', textAlign: 'center' }}>
+      <input type="file" onChange={handleFileChange} accept="image/*" />
+      <Button type="button" variant="contained" color="primary" onClick={handleFileView}>
+        Cargar Fotografia
+      </Button>
+    </div>
+  );
+}
+
+function PhotoView({ image, uploadImage, loading }) {
+  return (
+    <Paper elevation={2}>
+      <div style={{ padding: '15px 0px 0px 0px', border: 'none', height: '365px', width: '300px', textAlign: 'center' }}>
+        {image && (
+          <div>
+            <img src={image} alt="screenshot" width="300px" height="300px" style={{ objectFit: 'cover' }} />
+          </div>
+        )}
+        <div style={{ padding: '0px 10px 10px 0px', textAlign: 'center' }}>
+          <Button type="button" variant="contained" disabled={image == null || loading} color="primary" onClick={uploadImage}>
+            Subir Fotografia
+          </Button>
+        </div>
+      </div>
+    </Paper>
+  );
 }
 
 export { MyWebcam };

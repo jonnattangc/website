@@ -1,317 +1,215 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Grid, CircularProgress, TextField, Button, Stack } from '@mui/material';
 import Select from 'react-select';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import env from 'react-dotenv'
+import { apiClient, authHeaders } from '../services/api';
+import { env } from '../config/clientEnv';
 
-export class CLCommunes extends React.Component {
-    constructor(props) {
-        super(props);
+export function CLCommunes({ disabled, mapfunc }) {
+  const [loadingGral, setLoadingGral] = useState(true);
+  const [loadingReg, setLoadingReg] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [captchaOk, setCaptchaOk] = useState(false);
+  const [communes, setCommunes] = useState(null);
+  const [commune, setCommune] = useState(null);
+  const [regions, setRegions] = useState(null);
+  const [region, setRegion] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [address, setAddress] = useState('');
 
-        this.state = {
-            loading_gral: true,
-            loading_reg: false,
-            searching: false,
-            captcha_ok: false,
-            communes: null,
-            commune: null,
-            regions: null,
-            region: null,
-            errorMsg: null,
-            selections: [],
-            address: ''
-        };
-
-        this.getRegions();
-        // this.getCommunes(props.default);
-    }
-    /**
-        * Obtiene las comunas de una regi'on
-        * @param {*} region
-        */
-    getRegions = async () => {
-        try {
-            this.setState({ loading_reg: true });
-            const origin = window.location.origin.replace('https://', '');
-            var region_request = await fetch(
-                env.API_BASE_URL + '/geo/regions', {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': origin,
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                    'x-api-key': env.GEO_API_KEY
-                },
-            });
-            var region_response = await region_request.json();
-
-            if (region_request.status === 200) {
-                console.log('GET region_response.regions: ', region_response);
-                var regiones = [];
-                region_response.data.regions.forEach(region => {
-                    regiones.push({
-                        value: region.id,
-                        label: region.value
-                    });
-                });
-                console.log('GET regions: ', regiones);
-                this.setState({ regions: regiones, loading_gral: false, loading_reg: false });
-            }
-            else {
-                console.log('[405]: ' + region_request.error);
-                this.setState({ loading_gral: false, loading_reg: false, errorMsg: region_request.error });
-            }
-        }
-        catch (error) {
-            this.setState({ loading: false, errorMsg: error.message || "Algo salió mal" });
-            throw error;
-        }
-    }
-    /**
-     * Obtiene las comunas de una regi'on
-     * @param {*} region
-     */
-    getCommunes = async (region) => {
-        try {
-            this.setState({ loading_reg: true });
-            const origin = window.location.origin.replace('https://', '');
-            var communes_request = await fetch(
-                env.API_BASE_URL + '/geo/' + region + '/communes', {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': origin,
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                    'x-api-key': env.GEO_API_KEY
-                },
-            });
-            var commune_response = await communes_request.json();
-
-            if (communes_request.status === 200) {
-                console.log('GET Communes: ', commune_response.data);
-                var communes = [];
-                commune_response.data.communes.forEach(commune => {
-                    communes.push({
-                        value: commune.id,
-                        label: commune.value
-                    });
-                });
-
-                this.setState({ communes: communes, region: commune_response.data.region, loading_reg: false, });
-            }
-            else {
-                console.log('[405]: ' + communes_request.error);
-                this.setState({ loading: false, errorMsg: communes_request.error });
-            }
-        }
-        catch (error) {
-            this.setState({ loading: false, errorMsg: error.message || "Algo salió mal" });
-            throw error;
-        }
-    }
-
-    onChangeCommune = async (event) => {
-        try {
-            console.log('#### Comuna: ', event.value);
-            this.setState({ commune: event.label });
-        }
-        catch (error) {
-            this.setState({ loading: false, errorMsg: error || "Algo salió mal" });
-            throw error;
-        }
-    }
-
-    onSearchMap = async (event) => {
-        try {
-            this.setState({ searching: true });
-            console.log('%%%%%%%%%%%%%%%%% event: ', event)
-            let address = {
-                street: this.state.address.replaceAll(' ', '%20'),
-                city: this.state.commune.replaceAll(' ', '%20'),
-                state: this.state.region.replaceAll(' ', '%20'),
-                country: 'Chile'
-            }
-            let place = await this.findGeoPos(address)
-            if (place != null) {
-                let point = [place.latitude, place.longitude]
-                this.props.mapfunc(point, "Busqueda", place.detail)
-                let msg = 'Lat: ' + place.latitude + ' Lon: ' + place.longitude + ' ' + place.detail 
-                this.setState({ searching: false, errorMsg: msg });
-            } else {
-                this.setState({ searching: false, errorMsg: 'No hay resultados en la busqueda' });
-            }
-        }
-        catch (error) {
-            this.setState({ searching: false, errorMsg: error });
-            throw Error(error);
-        }
-    }
-
-    findGeoPos = async (dataTx) => {
-        let jsonrx = null
-        const origin = window.location.origin.replace('https://', '');
-        var request = await fetch(env.API_BASE_URL + '/geo/search', {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Accept': 'application/json',
-                'Access-Control-Allow-Origin': origin,
-                'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                'x-api-key': env.GEO_API_KEY
-            },
-            body: JSON.stringify({ 'data': dataTx })
+  useEffect(() => {
+    let cancelled = false;
+    async function getRegions() {
+      try {
+        setLoadingReg(true);
+        const response = await apiClient('/geo/regions', {
+          method: 'GET',
+          headers: authHeaders(env.GEO_API_KEY),
         });
-
-        console.log('POST request: ', request);
-        if (request.status === 200) {
-            let response = await request.json()
-            console.log('Respuesta Servidor Geografico: ', response)
-            if (response.data != null)
-                jsonrx = response.data
+        if (!cancelled && response.data?.regions) {
+          const regiones = response.data.regions.map(r => ({ value: r.id, label: r.value }));
+          setRegions(regiones);
+          setLoadingGral(false);
+          setLoadingReg(false);
         } else {
-            console.log('Error: ', request.status)
+          setLoadingGral(false);
+          setLoadingReg(false);
+          setErrorMsg('Error cargando regiones');
         }
-        return jsonrx
+      } catch (error) {
+        if (!cancelled) {
+          setLoadingGral(false);
+          setLoadingReg(false);
+          setErrorMsg(error.message || 'Algo salió mal');
+        }
+        console.error(error);
+      }
     }
+    getRegions();
+    return () => { cancelled = true; };
+  }, []);
 
-    onChangeRegion = async (event) => {
-        try {
-            console.log('#### Region: ', event.label);
-            this.getCommunes(event.value);
-        }
-        catch (error) {
-            this.setState({ loading_gral: false, errorMsg: error });
-            throw Error(error);
-        }
+  const getCommunes = async (regionId) => {
+    try {
+      setLoadingReg(true);
+      const response = await apiClient(`/geo/${regionId}/communes`, {
+        method: 'GET',
+        headers: authHeaders(env.GEO_API_KEY),
+      });
+      if (response.data?.communes) {
+        const comunas = response.data.communes.map(c => ({ value: c.id, label: c.value }));
+        setCommunes(comunas);
+        setRegion(response.data.region);
+        setLoadingReg(false);
+      } else {
+        setLoadingReg(false);
+        setErrorMsg('Error cargando comunas');
+      }
+    } catch (error) {
+      setLoadingReg(false);
+      setErrorMsg(error.message || 'Algo salió mal');
+      console.error(error);
     }
+  };
 
-    handleVerificationSuccess = async (token, ekey) => {
-        try {
-            await this.validateCapcha(token, ekey)
-        }
-        catch (error) {
-            throw Error(error);
-        }
+  const onChangeCommune = (event) => {
+    setCommune(event?.label || null);
+  };
+
+  const onSearchMap = async () => {
+    try {
+      setSearching(true);
+      const addressTx = {
+        street: encodeURIComponent(address),
+        city: encodeURIComponent(commune || ''),
+        state: encodeURIComponent(region || ''),
+        country: 'Chile',
+      };
+      const place = await findGeoPos(addressTx);
+      if (place != null) {
+        const point = [place.latitude, place.longitude];
+        mapfunc(point, 'Busqueda', place.detail);
+        const msg = `Lat: ${place.latitude} Lon: ${place.longitude} ${place.detail}`;
+        setSearching(false);
+        setErrorMsg(msg);
+      } else {
+        setSearching(false);
+        setErrorMsg('No hay resultados en la busqueda');
+      }
+    } catch (error) {
+      setSearching(false);
+      setErrorMsg(error.message || 'Error en búsqueda');
+      console.error(error);
     }
+  };
 
-    onChangeAddress = async (event) => {
-        try {
-            this.setState({ address: event.target.value });
-        }
-        catch (error) {
-            throw Error(error);
-        }
+  const findGeoPos = async (dataTx) => {
+    const response = await apiClient('/geo/search', {
+      method: 'POST',
+      headers: authHeaders(env.GEO_API_KEY),
+      body: JSON.stringify({ data: dataTx }),
+    });
+    return response.data || null;
+  };
+
+  const onChangeRegion = (event) => {
+    setCommunes(null);
+    setCommune(null);
+    getCommunes(event.value);
+  };
+
+  const handleVerificationSuccess = async (token, ekey) => {
+    try {
+      await validateCaptcha(token, ekey);
+    } catch (error) {
+      console.error('Captcha verification failed:', error);
     }
+  };
 
-    async validateCapcha(token, ekey) {
-        try {
-            console.log('HCaptcha token: ', token);
-            console.log('HCaptcha ekey: ', ekey);
-            let dataCaptcha = {
-                token: token,
-                secret: env.HCAPTCHA_SECRET,
-                sitekey: env.HCAPTCHA_SITE_KEY
-            }
-            const origin = window.location.origin.replace('https://', '');
-            var request = await fetch(
-                env.API_BASE_URL + '/page/hcaptcha', {
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify({ 'data': dataCaptcha }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': origin,
-                    'Authorization': 'Basic ' + env.AUTH_JONNA_SERVER,
-                    'x-api-key': env.PAGE_API_KEY
-                },
-            });
-            var response = await request.json();
+  const onChangeAddress = (event) => {
+    setAddress(event.target.value);
+  };
 
-            if (request.status === 200) {
-                console.log('POST : ', response);
-                this.setState({ captcha_ok: response.data.success });
-            }
-            else {
-                console.log('[405]: ' + request.error);
-                this.setState({ captcha: false });
-            }
-        }
-        catch (error) {
-            //this.setState({ loading: false, errorMsg: error });
-            throw Error(error);
-        }
+  const validateCaptcha = async (token, ekey) => {
+    try {
+      const dataCaptcha = { token, sitekey: env.HCAPTCHA_SITE_KEY };
+      const response = await apiClient('/page/hcaptcha', {
+        method: 'POST',
+        body: JSON.stringify({ data: dataCaptcha }),
+        headers: authHeaders(),
+      });
+      if (response.data) {
+        setCaptchaOk(response.data.success);
+      } else {
+        setCaptchaOk(false);
+      }
+    } catch (error) {
+      console.error('Captcha validation error:', error);
+      setCaptchaOk(false);
     }
+  };
 
-    render() {
-        const { captcha_ok, loading_gral, loading_reg, searching, communes, regions, errorMsg } = this.state;
-        console.log('state', this.state)
+  if (loadingGral) {
+    return (
+      <div className="App_Main" style={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </div>
+    );
+  }
 
-        if (loading_gral)
-            return (<div className='App_Main' align='center' > <CircularProgress /> </div>);
-        else {
-            return (
-                <div className='App_Main' align='center' >
-                    <Stack spacing={2}>
-                        <Grid container spacing={0} rowSpacing={2} columnSpacing={1}>
-                            <Grid item xs={3}>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                    <div style={{ width: '100%' }}>
-                                        <Select labelId='Regiones' id='reg' options={regions} isSearchable={true} onChange={(event) => { this.onChangeRegion(event) }} />
-                                    </div>
-                                    {
-                                        loading_reg ? <CircularProgress color="success" size={20} /> : null
-                                    }
-                                </Stack>
-                            </Grid>
+  return (
+    <div className="App_Main" style={{ textAlign: 'center' }}>
+      <Stack spacing={2}>
+        <Grid container spacing={0} rowSpacing={2} columnSpacing={1}>
+          <Grid item xs={3}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <div style={{ width: '100%' }}>
+                <Select labelId="Regiones" id="reg" options={regions} isSearchable={true} onChange={onChangeRegion} />
+              </div>
+              {loadingReg && <CircularProgress color="success" size={20} />}
+            </Stack>
+          </Grid>
 
-                            <Grid item xs={2}>
-                                {
-                                    communes != null ? <Select labelId='Comunas' id='com' options={communes} isSearchable={true}
-                                        onChange={(event) => { this.onChangeCommune(event) }} /> : null
-                                }
-                            </Grid>
+          <Grid item xs={2}>
+            {communes && (
+              <Select labelId="Comunas" id="com" options={communes} isSearchable={true} onChange={onChangeCommune} />
+            )}
+          </Grid>
 
-                            <Grid item xs={2}>
-                                {
-                                    communes != null && regions != null ?
-                                        <TextField id="dir" fullWidth label="Dirección personal" helperText="Dirección cualquiera dentro de Chile" size="small" onChange={(event) => { this.onChangeAddress(event) }} />
-                                        : null
-                                }
-                            </Grid>
+          <Grid item xs={2}>
+            {communes && regions && (
+              <TextField id="dir" fullWidth label="Dirección personal" helperText="Dirección cualquiera dentro de Chile" size="small" onChange={onChangeAddress} />
+            )}
+          </Grid>
 
-                            <Grid item xs={3}>
-                                {
-                                    communes != null && regions != null ?
-                                        <div style={{ width: '80%' }}> <HCaptcha sitekey={env.HCAPTCHA_SITE_KEY} onVerify={(token, ekey) => this.handleVerificationSuccess(token, ekey)} /> </div>
-                                        : null
-                                }
-                            </Grid>
-                            <Grid item xs={2}>
-                                <Stack direction="row" alignItems="center" spacing={2}>
-                                    {
-                                        communes != null && regions != null ?
-                                            <Button type="submit" disabled={!captcha_ok} variant="contained" color="success" onClick={this.onSearchMap}> Buscar</Button>
-                                            : null
-                                    }
-                                    {
-                                        searching ? <CircularProgress color="success" size={20} /> : null
-                                    }
-                                </Stack>
+          <Grid item xs={3}>
+            {communes && regions && (
+              <div style={{ width: '80%' }}>
+                <HCaptcha sitekey={env.HCAPTCHA_SITE_KEY} onVerify={(token, ekey) => handleVerificationSuccess(token, ekey)} />
+              </div>
+            )}
+          </Grid>
 
-                            </Grid>
-                            <Grid item xs={12}>
-                                {
-                                    errorMsg != null ? <div style={{ width: '70%', align: 'left', itemAlign: 'left' }}><Alert severity="error">{errorMsg}</Alert> </div> : null
-                                }
-                            </Grid>
-                        </Grid>
-                    </Stack>
-                </div>
-            );
-        }
-    }
+          <Grid item xs={2}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              {communes && regions && (
+                <Button type="button" disabled={!captchaOk} variant="contained" color="success" onClick={onSearchMap}>
+                  Buscar
+                </Button>
+              )}
+              {searching && <CircularProgress color="success" size={20} />}
+            </Stack>
+          </Grid>
+
+          <Grid item xs={12}>
+            {errorMsg && (
+              <div style={{ width: '70%', textAlign: 'left' }}>
+                <Alert severity={errorMsg.startsWith('Lat:') ? 'info' : 'error'}>{errorMsg}</Alert>
+              </div>
+            )}
+          </Grid>
+        </Grid>
+      </Stack>
+    </div>
+  );
 }
