@@ -16,8 +16,6 @@ ENV VITE_GEO_API_KEY=$GEO_API_KEY
 ENV VITE_LOGIA_API_KEY=$LOGIA_API_KEY
 ENV VITE_UCC_API_KEY=$UCC_API_KEY
 
-ENV NODE_ENV=production
-
 WORKDIR /usr/src/app
 
 COPY ./jonnapp .
@@ -27,6 +25,8 @@ RUN npm install
 ADD .env.example .env
 
 RUN npm run build
+
+ENV NODE_ENV=production
 
 FROM nginx:stable-alpine
 
