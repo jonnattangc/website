@@ -22,9 +22,9 @@ export function CLCommunes({ disabled, mapfunc }) {
     async function getRegions() {
       try {
         setLoadingReg(true);
-        const response = await apiClient('/geo/regions', {
+        const response = await apiClient('/page/geo/regions', {
           method: 'GET',
-          headers: authHeaders(env.GEO_API_KEY),
+          headers: authHeaders(),
         });
         if (!cancelled && response.data?.regions) {
           const regiones = response.data.regions.map(r => ({ value: r.id, label: r.value }));
@@ -34,7 +34,7 @@ export function CLCommunes({ disabled, mapfunc }) {
         } else {
           setLoadingGral(false);
           setLoadingReg(false);
-          setErrorMsg('Error cargando regiones');
+          setErrorMsg('');
         }
       } catch (error) {
         if (!cancelled) {
@@ -52,9 +52,9 @@ export function CLCommunes({ disabled, mapfunc }) {
   const getCommunes = async (regionId) => {
     try {
       setLoadingReg(true);
-      const response = await apiClient(`/geo/${regionId}/communes`, {
+      const response = await apiClient(`/page/geo/${regionId}/communes`, {
         method: 'GET',
-        headers: authHeaders(env.GEO_API_KEY),
+        headers: authHeaders(),
       });
       if (response.data?.communes) {
         const comunas = response.data.communes.map(c => ({ value: c.id, label: c.value }));
@@ -104,9 +104,9 @@ export function CLCommunes({ disabled, mapfunc }) {
   };
 
   const findGeoPos = async (dataTx) => {
-    const response = await apiClient('/geo/search', {
+    const response = await apiClient('/page/geo/search', {
       method: 'POST',
-      headers: authHeaders(env.GEO_API_KEY),
+      headers: authHeaders(),
       body: JSON.stringify({ data: dataTx }),
     });
     return response.data || null;

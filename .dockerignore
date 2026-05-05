@@ -1,5 +1,4 @@
 # Ignore 
-
 .dockerignore
 .gitignore
 **/node_modules
@@ -7,3 +6,5 @@
 Dockerfile*
 docker-compose*.yml
 .env
+.ash_history
+.yarnrc

@@ -1,4 +1,6 @@
 # Logs
+.ash_history
+.yarnrc
 logs
 *.log
 npm-debug.log*

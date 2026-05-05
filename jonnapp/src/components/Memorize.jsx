@@ -15,9 +15,10 @@ function Memorize() {
           headers: authHeaders(),
         });
         if (!cancelled && response.data) {
+          console.log('#### Data Memorize: ', response.data);
           const cards = response.data.map(state => ({
             name: state.name,
-            visible: state.state === 'up',
+            visible: Boolean(state.state === 'up'),
           }));
           setCardState(cards);
         }

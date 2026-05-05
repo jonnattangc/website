@@ -22,7 +22,7 @@ COPY ./jonnapp .
 
 RUN npm install
 
-ADD .env.example .env
+ADD .env .env
 
 RUN npm run build
 
