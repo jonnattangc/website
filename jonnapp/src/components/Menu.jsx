@@ -21,6 +21,7 @@ const internalLinks = [
 
 const externalLinks = [
   { label: 'Blog', href: 'https://www.jonnattan.com' },
+  { label: 'Intranet', href: 'https://intranet.jonna.cl' },
   { label: 'GitHub', href: 'https://github.com/jonnattangc' },
   { label: 'Sonar', href: 'https://sonarcloud.io/organizations/jonnattan-org/projects' },
   { label: 'Fundación', href: 'https://www.buenaventuracadiz.cl' },

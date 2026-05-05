@@ -130,11 +130,11 @@ function BtnsTest() {
   };
 
   const redirectUcc = () => {
-    window.location.href = 'https://dev.jonnattan.com/ucc/15173808-7';
+    window.location.href = 'https://www.jonnattan.cl/ucc/15173808-7';
   };
 
   const redirectCSRF = () => {
-    window.location.href = 'https://dev.jonnattan.com/page';
+    window.location.href = 'https://www.jonnattan.cl/page';
   };
 
   return (

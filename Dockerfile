@@ -4,17 +4,11 @@ ARG API_BASE_URL
 ARG HCAPTCHA_SITE_KEY
 ARG AUTH_JONNA_SERVER
 ARG PAGE_API_KEY
-ARG GEO_API_KEY
-ARG LOGIA_API_KEY
-ARG UCC_API_KEY
 
 ENV VITE_API_BASE_URL=$API_BASE_URL
 ENV VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY
 ENV VITE_AUTH_JONNA_SERVER=$AUTH_JONNA_SERVER
 ENV VITE_PAGE_API_KEY=$PAGE_API_KEY
-ENV VITE_GEO_API_KEY=$GEO_API_KEY
-ENV VITE_LOGIA_API_KEY=$LOGIA_API_KEY
-ENV VITE_UCC_API_KEY=$UCC_API_KEY
 
 WORKDIR /usr/src/app
 
@@ -22,11 +16,17 @@ COPY ./jonnapp .
 
 RUN npm install
 
-ADD .env.example .env
+ADD enviroments .env
 
 RUN npm run build
 
 ENV NODE_ENV=production
+
+ENV TZ=UTC
+
+ENV WDS_SOCKET_PORT=0
+
+ENV WDS_SOCKET_BROWSER=none
 
 FROM nginx:stable-alpine
 
@@ -39,3 +39,9 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
+
+# docker build --build-arg API_BASE_URL=https://api.jonna.cl \
+# --build-arg=HCAPTCHA_SITE_KEY=? \ 
+# --build-arg AUTH_JONNA_SERVER=? \ 
+# --build-arg PAGE_API_KEY=? \ 
+# -t jonnattangc/website:1.0.0 .

@@ -7,6 +7,7 @@ const defaultHeaders = {
 
 export const apiClient = async (endpoint, options = {}) => {
   const url = `${env.API_BASE_URL}${endpoint}`;
+  console.log(`API Request: ${options.method || 'GET'} ${url}`);
   const res = await fetch(url, {
     ...options,
     headers: {

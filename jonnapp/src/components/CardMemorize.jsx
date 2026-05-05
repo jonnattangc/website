@@ -32,6 +32,7 @@ function CardMemorize({ visible: initialVisible, name }) {
         body: JSON.stringify({ data: dataJson }),
       });
       if (response.data) {
+        console.log('#### Data: ',response.data);
         setVisible(response.data.visible);
       }
     } catch (error) {
